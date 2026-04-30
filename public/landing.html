@@ -368,6 +368,30 @@
         @media (max-width: 991px) {
             .mission-grid { grid-template-columns: 1fr; }
         }
+
+        /* === TYPEWRITER EFFECT === */
+        .morph-word {
+            display: inline-block;
+            position: relative;
+            min-width: 2ch;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 0.85em;
+            background: var(--safety, #FF3E00);
+            margin-left: 8px;
+            vertical-align: baseline;
+            position: relative;
+            top: 0.05em;
+            animation: cursor-blink 0.7s steps(1) infinite;
+        }
+
+        @keyframes cursor-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
     </style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
@@ -418,7 +442,7 @@
         <div class="hero__label">Precision Goal Engineering</div>
         <h1 class="hero__title">
             <span class="line">Map Your</span>
-            <span class="line line--indent">Success<span class="accent-dot">.</span></span>
+            <span class="line line--indent"><span class="morph-word" id="heroMorphWord"><span id="heroMorphText">Success</span><span class="typewriter-cursor"></span></span><span class="accent-dot">.</span></span>
         </h1>
         <div class="hero__bottom">
             <p class="hero__desc">Turn your massive, undefined goals into structurally sound, machine-generated
@@ -770,6 +794,65 @@
         }
 
         document.addEventListener('DOMContentLoaded', populateProfile);
+
+        // === TYPEWRITER ENGINE ===
+        (function() {
+            const words = ['Success', 'Growth', 'Victory', 'Mastery', 'Impact', 'Triumph', 'Legacy', 'Fortune', 'Conquest', 'Zenith'];
+            const morphEl = document.getElementById('heroMorphWord');
+            if (!morphEl) return;
+
+            let currentIndex = 0;
+            // Use the inner text span
+            const textEl = document.getElementById('heroMorphText');
+            if (!textEl) return;
+
+            const TYPE_SPEED = 90;   // ms per character when typing
+            const DELETE_SPEED = 55; // ms per character when deleting
+            const PAUSE_AFTER_TYPE = 2500; // ms to wait before deleting
+            const PAUSE_AFTER_DELETE = 400; // ms to wait before typing next word
+
+            function typeWord(word, callback) {
+                let i = 0;
+                function typeChar() {
+                    if (i < word.length) {
+                        textEl.textContent += word[i];
+                        i++;
+                        setTimeout(typeChar, TYPE_SPEED);
+                    } else {
+                        callback();
+                    }
+                }
+                typeChar();
+            }
+
+            function deleteWord(callback) {
+                function deleteChar() {
+                    const text = textEl.textContent;
+                    if (text.length > 0) {
+                        textEl.textContent = text.slice(0, -1);
+                        setTimeout(deleteChar, DELETE_SPEED);
+                    } else {
+                        callback();
+                    }
+                }
+                deleteChar();
+            }
+
+            function cycle() {
+                setTimeout(() => {
+                    deleteWord(() => {
+                        currentIndex = (currentIndex + 1) % words.length;
+                        setTimeout(() => {
+                            typeWord(words[currentIndex], cycle);
+                        }, PAUSE_AFTER_DELETE);
+                    });
+                }, PAUSE_AFTER_TYPE);
+            }
+
+            // Initialize
+            textEl.textContent = words[0];
+            cycle();
+        })();
     </script>
     <script src="js/command-palette.js"></script>
     <script src="js/os-ui.js"></script>
