@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Tracker — Aevura OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/templatemo-axis-industrial.css">
+    <link rel="stylesheet" href="css/command-palette.css">
+    <style>
+        :root {
+            --accent: #FF3E00;
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
+            --text: #e0e0e0;
+            --text-dim: #999;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 3rem;
+            gap: 20px;
+        }
+        .header-section h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            margin: 0;
+        }
+        .accent-dot { color: var(--accent); }
+
+        /* Metrics Grid matching Lab/Simulation */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .panel {
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 20px 20px 0px rgba(255, 62, 0, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .panel:hover {
+            border-color: var(--accent);
+            transform: translate(-5px, -5px);
+            box-shadow: 25px 25px 0px rgba(255, 62, 0, 0.08);
+        }
+
+        .metric-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-top: 15px;
+            display: block;
+        }
+
+        /* High-Impact Progress Gauge */
+        .progress-gauge-container {
+            background: #0c0c0c;
+            border: 1px solid var(--border);
+            padding: 40px;
+            margin-bottom: 2.5rem;
+        }
+
+        .gauge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 25px;
+        }
+
+        .gauge-title {
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .gauge-percent {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            color: #fff;
+            line-height: 0.8;
+            letter-spacing: -2px;
+            min-width: 140px;
+            text-align: right;
+        }
+
+        .gauge-bar-track {
+            height: 50px;
+            background: #000;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 6px;
+            padding: 6px;
+        }
+
+        .gauge-segment {
+            flex: 1;
+            background: #1a1a1a;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .gauge-segment.filled {
+            background: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 62, 0, 0.2);
+        }
+
+        .gauge-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        /* AI Insight Box */
+        .insight-panel {
+            background: #000;
+            border: 1px solid var(--accent);
+            padding: 2.5rem;
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-panel::before {
+            content: "SYSTEM_ANALYSIS // MODULE_08";
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--accent);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 4px 12px;
+            letter-spacing: 1px;
+        }
+
+        .insight-text {
+            font-size: 1.1rem;
+            color: #fff;
+            line-height: 1.8;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Task List Industrial Style */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-item {
+            background: #0c0c0c;
+            border: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .task-item::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--border);
+            transition: 0.2s;
+        }
+
+        .task-item:hover {
+            border-color: var(--accent);
+            background: #111;
+        }
+        
+        .task-item:hover::before {
+            background: var(--accent);
+        }
+
+        .task-item.completed {
+            opacity: 0.4;
+            border-style: dashed;
+        }
+        
+        .task-item.completed::before {
+            background: #333;
+        }
+
+        .checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+
+        .task-item:hover .checkbox {
+            border-color: var(--accent);
+        }
+
+        .checkbox.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .checkbox.checked::after {
+            content: "✓";
+            color: #000;
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        .task-content { flex: 1; }
+        
+        .task-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .task-meta {
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #111;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 40px;
+            border: 1px dashed var(--border);
+            background: rgba(255, 62, 0, 0.02);
+        }
+
+        /* Industrial Buttons */
+        .btn-action {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: block;
+            margin: 0 auto;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+        .btn-action:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 4px 4px 0px #fff;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 14px;
+            font-family: inherit;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-back:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .progress-gauge-container {
+                padding: 20px;
+            }
+            .gauge-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .gauge-percent {
+                font-size: 3rem;
+                min-width: auto;
+                text-align: left;
+            }
+            .gauge-meta {
+                font-size: 7px;
+            }
+            .breadcrumb { font-size: 8px; gap: 6px; }
+            .header-section h1 { font-size: 2.2rem; }
+            .metric-value { font-size: 2.5rem; }
+        }
+    </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+<header class="os-header">
+    <div class="header-inner">
+        <div class="header-left">
+            <a href="landing.html" class="os-logo">
+                <span class="logo-mark">>_</span>
+                <span class="logo-text">AEVURA <span class="logo-os">OS</span></span>
+            </a>
+            <span class="sep hide-mobile"></span>
+            <span class="version hide-mobile">v1.0.5</span>
+        </div>
+        
+        <nav class="header-nav hide-mobile">
+            <a href="landing.html">Dashboard</a>
+            <a href="modules.html">Modules</a>
+            <a href="about-me.html">About Me</a>
+            <a href="contact-us.html">Contact Us</a>
+        </nav>
+
+        <div class="header-right">
+            <div class="status-indicator hide-mobile">
+                <span class="dot"></span>
+                SYSTEM NOMINAL
+            </div>
+            <div class="user-info">
+                <span class="user-name hide-mobile">AUTHENTICATING...</span>
+                <button onclick="osSignout()" class="btn-signout">TERMINATE</button>
+            </div>
+            <button class="header-cmd-btn show-mobile" onclick="togglePalette()" title="System Commands">
+                <span>>_</span>
+            </button>
+            <button class="menu-toggle show-mobile" onclick="toggleMobileMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</header>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <div style="font-size: 11px; letter-spacing: 4px; color: var(--accent);">SYNCING_PROGRESS_DATA...</div>
+    </div>
+
+    <div class="app-container">
+        <div class="breadcrumb">
+            System / <span>Module 08</span> / <span>Progress Tracker</span>
+        </div>
+
+        <div class="header-section">
+            <h1>Progress<br>Tracker<span class="accent-dot">.</span></h1>
+            <a href="#" onclick="history.back(); return false;" class="btn-back" style="margin-bottom: 5px;">← Back</a>
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <!-- NEW GAUGE SECTION -->
+            <div class="progress-gauge-container">
+                <div class="gauge-header">
+                    <div class="gauge-title">MISSION_COMPLETION_SEQUENCE</div>
+                    <div class="gauge-percent" id="gaugePercent">0%</div>
+                </div>
+                <div class="gauge-bar-track" id="gaugeTrack">
+                    <!-- Segments injected via JS -->
+                </div>
+                <div class="gauge-meta">
+                    <span>Initiation</span>
+                    <span>Execution_Matrix</span>
+                    <span>Final_Optimization</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="panel">
+                    <div class="metric-value" id="percent">0%</div>
+                    <span class="metric-label">Status Summary</span>
+                </div>
+                <div class="panel">
+                    <div class="metric-value" id="completedCount">0</div>
+                    <span class="metric-label">Milestones Cleared</span>
+                </div>
+                <div class="panel">
+                    <div class="metric-value" id="remainingCount">0</div>
+                    <span class="metric-label">Pending Objectives</span>
+                </div>
+            </div>
+
+            <div class="insight-panel">
+                <div class="insight-text" id="insight">Analyzing current trajectory...</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 2rem;">
+                <div style="height: 1px; flex: 1; background: var(--border);"></div>
+                <div style="font-size: 11px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;">Operational_Task_Queue</div>
+                <div style="height: 1px; flex: 1; background: var(--border);"></div>
+            </div>
+
+            <div class="task-list" id="taskList"></div>
+        </div>
+
+        <div id="empty" class="empty-state" style="display: none;">
+            <h2 style="font-family: 'Space Grotesk'; font-size: 2.5rem; color: var(--accent); margin-bottom: 1rem;">PLAN_NOT_FOUND</h2>
+            <p style="color: var(--text-dim); margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">The system requires an active roadmap to track progression. Return to the Core Engine Lab to initialize your sequence.</p>
+            <a href="index.html" class="btn-action">Launch Core Lab</a>
+        </div>
+    </div>
+
+    <script src="js/os-ui.js"></script>
+    <script>
+        async function fetchProgress() {
+            const cached = sessionStorage.getItem('aevura_mission_cache');
+            if (cached) {
+                renderProgressUI(JSON.parse(cached));
+            }
+
+            try {
+                // Fetch latest data (silent background sync)
+                const res = await fetch('/api/progress');
+                const data = await res.json();
+
+                if (!data.error) {
+                    sessionStorage.setItem('aevura_mission_cache', JSON.stringify(data));
+                    renderProgressUI(data);
+                } else if (!cached) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('empty').style.display = 'block';
+                }
+            } catch (e) {
+                console.error(e);
+                if (!cached) document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function renderProgressUI(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            
+            // Update Metrics immediately
+            document.getElementById('percent').textContent = data.metrics.progress_percentage + '%';
+            document.getElementById('gaugePercent').textContent = data.metrics.progress_percentage + '%';
+            document.getElementById('completedCount').textContent = data.metrics.completed_tasks;
+            document.getElementById('remainingCount').textContent = data.metrics.remaining_tasks;
+            document.getElementById('insight').textContent = data.metrics.insight;
+
+            // Render Gauge Segments
+            const track = document.getElementById('gaugeTrack');
+            track.innerHTML = '';
+            const totalTasks = data.tasks.length;
+            const completedCount = data.completedTasks.length;
+
+            for (let i = 0; i < totalTasks; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'gauge-segment';
+                if (i < completedCount) {
+                    segment.classList.add('filled');
+                }
+                track.appendChild(segment);
+            }
+
+            // Render Tasks
+            const list = document.getElementById('taskList');
+            list.innerHTML = '';
+
+            data.tasks.forEach(task => {
+                const isCompleted = data.completedTasks.includes(task.title);
+                const div = document.createElement('div');
+                div.className = `task-item ${isCompleted ? 'completed' : ''}`;
+                div.onclick = () => toggleTask(task.title);
+                div.innerHTML = `
+                    <div class="checkbox ${isCompleted ? 'checked' : ''}"></div>
+                    <div class="task-content">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-meta">PRIORITY: ${task.priority.toUpperCase()} // STEP: ${task.order}</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            // Fetch AI Insight (SLOW - ASYNC)
+            fetch('/api/progress/insight')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.insight) {
+                        document.getElementById('insight').textContent = d.insight;
+                    }
+                });
+        }
+
+        async function toggleTask(title) {
+            try {
+                // Optimistic UI update
+                const items = document.querySelectorAll('.task-item');
+                items.forEach(item => {
+                    if (item.querySelector('.task-title').textContent === title) {
+                        item.classList.toggle('completed');
+                        item.querySelector('.checkbox').classList.toggle('checked');
+                    }
+                });
+
+                const res = await fetch('/api/progress/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ taskTitle: title })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Update metrics
+                    const res2 = await fetch('/api/progress');
+                    const data2 = await res2.json();
+                    if(!data2.error) {
+                        document.getElementById('percent').textContent = data2.metrics.progress_percentage + '%';
+                        document.getElementById('completedCount').textContent = data2.metrics.completed_tasks;
+                        document.getElementById('remainingCount').textContent = data2.metrics.remaining_tasks;
+                    }
+                    
+                    // Refresh AI insight in background
+                    fetch('/api/progress/insight')
+                        .then(r => r.json())
+                        .then(d => { if(d.insight) document.getElementById('insight').textContent = d.insight; });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchProgress);
+    </script>
+</body>
+</html>

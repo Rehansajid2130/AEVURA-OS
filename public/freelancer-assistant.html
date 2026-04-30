@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelancer Assistant — Aevura OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/command-palette.css">
+    <style>
+        :root {
+            --accent: #FF3E00;
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --border: #ddd;
+            --text: #181a1b;
+            --text-dim: #555;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
+            --text: #e0e0e0;
+            --text-dim: #999;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--surface); border-left: 1px solid var(--border); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; border: 1px solid var(--surface); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        * { scrollbar-width: thin; scrollbar-color: var(--accent) var(--surface); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 3rem;
+            gap: 20px;
+        }
+        .header-section h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            margin: 0;
+        }
+        .accent-dot { color: var(--accent); }
+
+        /* Tabs / Sections */
+        .grid { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; }
+        @media (max-width: 968px) { .grid { grid-template-columns: 1fr; } }
+
+        .sidebar { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 70px; }
+        .tab-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-family: inherit;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.1s;
+        }
+        .tab-btn:hover { border-color: var(--accent); color: var(--text); }
+        .tab-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+
+        .content-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            min-height: 600px;
+            position: relative;
+        }
+        .content-card::after {
+            content: ""; position: absolute; top: 0; right: 0; width: 40px; height: 40px;
+            background: linear-gradient(135deg, transparent 50%, var(--border) 50%);
+        }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem; text-transform: uppercase; }
+        .section-desc { color: var(--text-dim); font-size: 13px; margin-bottom: 2rem; line-height: 1.5; }
+
+        /* Forms */
+        label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+        textarea, input[type="text"] {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 56px;
+            margin-bottom: 1.5rem;
+            box-sizing: border-box;
+        }
+        textarea:focus, input[type="text"]:focus { 
+            outline: none; 
+            border-color: var(--accent); 
+            background: #000; 
+        }
+        /* Fix browser autofill white background */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        textarea:-webkit-autofill,
+        textarea:-webkit-autofill:hover,
+        textarea:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text);
+            -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        textarea { overflow: hidden; resize: none; min-height: 120px; }
+        
+        .action-btn {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 1rem 2rem;
+            font-family: inherit;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s;
+        }
+        .action-btn:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0px var(--text); }
+        .action-btn:disabled { background: #444; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Results display */
+        .results-box { margin-top: 3rem; border-top: 1px dashed var(--border); padding-top: 2rem; display: none; }
+        .results-box.visible { display: block; }
+        .result-label { font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 1.5rem; text-transform: uppercase; font-weight: 700; }
+        
+        .gig-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1rem; border-left: 3px solid var(--accent); }
+        .gig-title { font-size: 16px; color: var(--text); margin-bottom: 0.5rem; font-weight: 700; }
+        .gig-meta { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .tag { font-size: 10px; padding: 4px 8px; background: var(--bg); color: var(--text-dim); text-transform: uppercase; border: 1px solid var(--border); }
+        .tag.high { color: #00ff66; border-color: #004411; background: rgba(0,255,102,0.05); }
+        .gig-reason { font-size: 13px; color: #888; line-height: 1.6; }
+
+        .proposal-text { background: var(--bg); border: 1px solid var(--border); padding: 2rem; font-size: 14px; line-height: 1.7; white-space: pre-wrap; color: var(--text); }
+        .strategy-badge { display: inline-block; background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; font-size: 10px; margin-bottom: 1.5rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @media (max-width: 768px) {
+            .breadcrumb { font-size: 8px; gap: 6px; }
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+        .loading-text { font-size: 12px; color: var(--accent); font-style: italic; }
+        .error-text { font-size: 13px; color: #ff4444; margin-top: 1rem; }
+    </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            System / <span>Module 01</span> / <span>Freelancer Assistant</span>
+        </div>
+
+        <div class="header-section">
+            <h1>Freelancer<br>Assistant<span class="accent-dot">.</span></h1>
+            <a href="#" onclick="history.back(); return false;" class="btn-back" style="margin-bottom: 5px;">← Back</a>
+        </div>
+
+        <div class="grid">
+            <div class="sidebar">
+                <button class="tab-btn active" onclick="switchTab('gigs')">GIG SUGGESTIONS</button>
+                <button class="tab-btn" onclick="switchTab('proposal')">PROPOSAL GENERATOR</button>
+                <button class="tab-btn" onclick="switchTab('optimize')">PROFILE OPTIMIZER</button>
+            </div>
+
+            <div class="content-card">
+                <!-- ==================== GIG SUGGESTIONS ==================== -->
+                <div class="section active" id="sec-gigs">
+                    <h2>Gig Suggestion Engine</h2>
+                    <p class="section-desc">What skills or qualities do you want to use for your next gig? (e.g., ReactJS, JavaScript, Figma)</p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label>QUALITIES / SKILLS TO USE</label>
+                        <input type="text" id="gig-qualities" placeholder="e.g. ReactJS, JavaScript">
+                    </div>
+
+                    <button class="action-btn" id="btn-gigs" onclick="loadGigs()">FIND OPPORTUNITIES →</button>
+                    
+                    <div id="gig-guidance" style="margin-top: 25px; padding: 15px; background: var(--surface); border-left: 3px solid var(--accent); display: none; font-size: 13px; color: var(--text-dim); line-height: 1.5;"></div>
+
+                    <div class="results-box" id="res-gigs">
+                        <div class="result-label">// MARKET OPPORTUNITIES FOUND</div>
+                        <div id="gig-list"></div>
+                    </div>
+                </div>
+
+                <!-- ==================== PROPOSAL GENERATOR ==================== -->
+                <div class="section" id="sec-proposal">
+                    <h2>Proposal Generator</h2>
+                    <p class="section-desc">Paste a job description, we'll write a personalized proposal targeting that client.</p>
+                    
+                    <label>JOB DESCRIPTION</label>
+                    <textarea id="job-desc" placeholder="Paste the client's requirements here..."></textarea>
+                    
+                    <button class="action-btn" id="btn-proposal" onclick="loadProposal()">GENERATE PROPOSAL →</button>
+                    
+                    <div class="results-box" id="res-proposal">
+                        <div class="result-label">// TAILORED PROPOSAL</div>
+                        <div id="proposal-strategy" class="strategy-badge"></div>
+                        <div id="proposal-body" class="proposal-text"></div>
+                    </div>
+                </div>
+
+                <!-- ==================== PROFILE OPTIMIZER ==================== -->
+                <div class="section" id="sec-optimize">
+                    <h2>Profile Optimizer</h2>
+                    <p class="section-desc">Paste your existing marketplace details. We will rewrite them to be high-converting and professional.</p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label>CURRENT PROFILE TITLE</label>
+                        <input type="text" id="opt-current-title" placeholder="e.g. Graphic Designer / Frontend Dev">
+                        
+                        <label>CURRENT BIO / DESCRIPTION</label>
+                        <textarea id="opt-current-bio" placeholder="Paste your existing about me section here..." style="height: 120px;"></textarea>
+                        
+                        <label>TARGET SKILLS TO HIGHLIGHT</label>
+                        <input type="text" id="opt-target-skills" placeholder="e.g. SaaS Landing Pages, React Performance">
+                    </div>
+
+                    <button class="action-btn" id="btn-optimize" onclick="loadOptimize()">RESTACK MY PROFILE →</button>
+                    
+                    <div class="results-box" id="res-optimize">
+                        <div class="result-label">// PROFILE REVISIONS</div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <label>OPTIMIZED TITLE</label>
+                            <div id="opt-title" style="font-size: 18px; color: var(--text); border: 1px solid var(--border); padding: 12px; border-radius: 4px; background: var(--bg);"></div>
+                        </div>
+
+                        <div style="margin-bottom: 25px;">
+                            <label>OPTIMIZED BIO / DESCRIPTION</label>
+                            <div id="opt-desc" class="proposal-text"></div>
+                        </div>
+
+                        <div>
+                            <label>ACTIONABLE TIPS</label>
+                            <ul id="opt-tips" class="tips-list"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="global-error" class="error-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Tab Switching ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById('sec-' + tabId).classList.add('active');
+            
+            document.getElementById('global-error').textContent = '';
+        }
+
+        // --- Auto-resize Textareas ---
+        document.addEventListener('input', function(e) {
+            if (e.target.tagName.toLowerCase() === 'textarea') {
+                e.target.style.height = 'auto';
+                e.target.style.height = (e.target.scrollHeight) + 'px';
+            }
+        });
+
+        // --- API Helpers ---
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) options.body = JSON.stringify(body);
+            
+            const res = await fetch(endpoint, options);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            return data;
+        }
+
+        // --- Feature 1: Gigs ---
+        async function loadGigs() {
+            const btn = document.getElementById('btn-gigs');
+            const resBox = document.getElementById('res-gigs');
+            const list = document.getElementById('gig-list');
+            const guidance = document.getElementById('gig-guidance');
+            const qualities = document.getElementById('gig-qualities').value.trim();
+            
+            if (!qualities) { alert('Please enter at least one skill or quality!'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'ANALYZING MARKET...';
+            resBox.classList.remove('visible');
+            guidance.style.display = 'none';
+
+            try {
+                const data = await apiCall('/api/freelance/gigs', 'POST', { targetQualities: qualities });
+                
+                if (data.guidance) {
+                    guidance.textContent = data.guidance;
+                    guidance.style.display = 'block';
+                }
+
+                list.innerHTML = '';
+                const gigsArray = data.gig_suggestions || data.gig_suggestion || [];
+                if (!Array.isArray(gigsArray) || gigsArray.length === 0) {
+                    list.innerHTML = '<div style="color: var(--muted); font-size: 13px;">No opportunities found matching these exact criteria. Try adjusting your skills.</div>';
+                } else {
+                    gigsArray.forEach(gig => {
+                        list.innerHTML += `
+                        <div class="gig-card">
+                            <div class="gig-title">${gig.title}</div>
+                            <div class="gig-meta">
+                                <span class="tag">DIFFICULTY: ${gig.difficulty}</span>
+                                <span class="tag high">EARNING: ${gig.earning_potential}</span>
+                            </div>
+                            <div class="gig-reason">${gig.reason}</div>
+                        </div>
+                    `;
+                });
+                }
+                resBox.classList.add('visible');
+            } catch (e) {
+                document.getElementById('global-error').textContent = e.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'GENERATE SUGGESTIONS →';
+            }
+        }
+
+        // --- Feature 2: Proposal ---
+        async function loadProposal() {
+            const btn = document.getElementById('btn-proposal');
+            const resBox = document.getElementById('res-proposal');
+            const desc = document.getElementById('job-desc').value.trim();
+            
+            if (!desc) { alert('Please paste a job description.'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'CRAFTING PROPOSAL...';
+            resBox.classList.remove('visible');
+
+            try {
+                const data = await apiCall('/api/freelance/proposal', 'POST', { jobDescription: desc });
+                document.getElementById('proposal-strategy').textContent = `STRATEGY: ${data.strategy} (${data.tone})`;
+                document.getElementById('proposal-body').textContent = data.proposal;
+                resBox.classList.add('visible');
+            } catch (e) {
+                document.getElementById('global-error').textContent = e.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'GENERATE PROPOSAL →';
+            }
+        }
+
+        // --- Feature 3: Profile ---
+        async function loadOptimize() {
+            const btn = document.getElementById('btn-optimize');
+            const resBox = document.getElementById('res-optimize');
+            
+            const currentTitle = document.getElementById('opt-current-title').value.trim();
+            const currentBio = document.getElementById('opt-current-bio').value.trim();
+            const targetSkills = document.getElementById('opt-target-skills').value.trim();
+
+            if (!currentTitle || !currentBio || !targetSkills) { 
+                alert('Error: Please fill in your current title, bio, and target skills before optimizing.'); 
+                return; 
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'OPTIMIZING BIO...';
+            resBox.classList.remove('visible');
+
+            try {
+                const data = await apiCall('/api/freelance/profile-optimize', 'POST', { 
+                    currentTitle, 
+                    currentBio, 
+                    targetSkills 
+                });
+                
+                document.getElementById('opt-title').textContent = data.title || 'Profile Optimized';
+                document.getElementById('opt-desc').textContent = data.description || '';
+                
+                const tipsList = document.getElementById('opt-tips');
+                tipsList.innerHTML = '';
+                if (data.tips && Array.isArray(data.tips)) {
+                    data.tips.forEach(tip => {
+                        const li = document.createElement('li');
+                        li.textContent = tip;
+                        tipsList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = "No specific tips generated for this profile.";
+                    tipsList.appendChild(li);
+                }
+                
+                resBox.classList.add('visible');
+            } catch (e) {
+                document.getElementById('global-error').textContent = e.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'OPTIMIZE MY PROFILE →';
+            }
+        }
+    </script>
+    <script src="js/command-palette.js"></script>
+    <script src="js/os-ui.js"></script>
+</body>
+</html>

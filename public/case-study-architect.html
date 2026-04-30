@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Study Architect — Aevura OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/templatemo-axis-industrial.css">
+<link rel="stylesheet" href="css/command-palette.css">
+<style>
+    :root {
+        --accent: #FF3E00;
+        --bg: #0a0a0a;
+        --surface: #141414;
+        --border: #2a2a2a;
+        --text: #e0e0e0;
+        --text-dim: #999;
+    }
+
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'JetBrains Mono', monospace;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 3rem;
+        gap: 20px;
+    }
+    .header-section h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -2px;
+        line-height: 0.9;
+        text-transform: uppercase;
+    }
+    .accent-dot { color: var(--accent); }
+
+    .btn-back {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        padding: 6px 12px;
+        font-family: inherit;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        height: fit-content;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 10px;
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .breadcrumb span { color: var(--text); }
+    @media (max-width: 768px) {
+        .breadcrumb { font-size: 8px; gap: 6px; }
+        .header-section h1 { font-size: 2.2rem; }
+    }
+
+    /* Main Grid Layout */
+    .builder-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 968px) {
+        .builder-grid { grid-template-columns: 1fr; }
+        .header-section h1 { font-size: 2.5rem; }
+    }
+
+    /* Input Panel */
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .panel::after {
+        content: "";
+        position: absolute;
+        top: 0; right: 0;
+        width: 40px; height: 40px;
+        background: linear-gradient(135deg, transparent 50%, var(--border) 50%);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
+    textarea {
+        width: 100%;
+        background: #000;
+        border: 1px solid var(--border);
+        color: #fff;
+        padding: 1rem;
+        font-family: inherit;
+        font-size: 14px;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    textarea:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    .btn-generate {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 1rem 2rem;
+        font-family: inherit;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.1s;
+    }
+    .btn-generate:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0px #fff;
+    }
+    .btn-generate:active { transform: translate(0, 0); }
+    .btn-generate:disabled { background: #555; cursor: not-allowed; }
+
+    /* Result Panel */
+    .result-panel {
+        background: #000;
+        border: 1px dashed var(--border);
+        min-height: 500px;
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .placeholder-text {
+        color: #333;
+        text-align: center;
+        margin: auto;
+        font-size: 14px;
+        max-width: 300px;
+    }
+
+    .case-study h2 { 
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--accent);
+        font-size: 2rem;
+        margin-top: 0;
+    }
+    .case-study .meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1rem;
+    }
+    .meta-item { font-size: 11px; color: var(--text-dim); }
+    .meta-item strong { color: #fff; display: block; font-size: 13px; }
+
+    .grid-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .section-card {
+        background: var(--surface);
+        padding: 1.5rem;
+        border-left: 3px solid var(--accent);
+    }
+    .section-card h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 12px;
+        color: var(--accent);
+        text-transform: uppercase;
+    }
+    .section-card p { margin: 0; font-size: 14px; color: #ccc; }
+
+    .markdown-view {
+        margin-top: 2rem;
+        background: #111;
+        padding: 1.5rem;
+        font-size: 13px;
+        border: 1px solid #222;
+        color: #888;
+        white-space: pre-wrap;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    /* Loading Animation */
+    .loading-overlay {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #222;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); border-left: 1px solid var(--border); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 0; border: 1px solid var(--surface); }
+    * { scrollbar-width: thin; scrollbar-color: var(--accent) var(--surface); }
+
+    @media print {
+        body { background: #fff !important; color: #000 !important; }
+        .app-container { padding: 0 !important; max-width: none !important; }
+        .breadcrumb, .header-section, .panel, .btn-generate, .case-study-actions, #placeholder, #loading { 
+            display: none !important; 
+        }
+        .generator-grid { display: block !important; }
+        .result-panel { border: none !important; padding: 0 !important; min-height: 0 !important; background: transparent !important; }
+        .case-study-preview { 
+            max-height: none !important; 
+            overflow: visible !important; 
+            box-shadow: none !important; 
+            padding: 0 !important;
+            border: none !important;
+        }
+    }
+
+    [data-theme="light"] input,
+    [data-theme="light"] textarea,
+    [data-theme="light"] .input-area,
+    [data-theme="light"] select {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #cccccc !important;
+    }
+    [data-theme="light"] input:focus,
+    [data-theme="light"] textarea:focus {
+        border-color: var(--accent) !important;
+        background: #fdfdfd !important;
+    }
+</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="breadcrumb">
+        SYSTEM / <span>MODULE 03</span> / <span>CASE STUDY ARCHITECT</span>
+    </div>
+
+    <div class="header-section">
+        <h1>Case Study<br>Architect<span class="accent-dot">.</span></h1>
+        <a href="#" onclick="history.back(); return false;" class="btn-back">← Back</a>
+    </div>
+
+    <div class="builder-grid">
+        <!-- Input Block -->
+        <div class="panel">
+            <div class="form-group">
+                <label>Project Context & Notes</label>
+                <textarea id="projectNotes" rows="6" placeholder="Describe the problem you solved, the client, and the final impact..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Code Snippets / Technical Details</label>
+                <textarea id="codeSnippets" rows="10" placeholder="Paste relevant code fragments or architecture logic..."></textarea>
+            </div>
+            <button class="btn-generate" id="generateBtn" onclick="generatePortfolio()">
+                Architect Case Study
+            </button>
+        </div>
+
+        <!-- Result Block -->
+        <div class="result-panel" id="resultArea">
+            <div class="placeholder-text" id="placeholder">
+                // SYSTEM IDLE<br>
+                Awaiting project data for structural optimization.
+            </div>
+
+            <div class="loading-overlay" id="loading">
+                <div class="spinner"></div>
+                <div style="font-size: 11px; letter-spacing: 2px;">PROCESSING DATA...</div>
+            </div>
+
+            <div id="caseStudyContent" style="display:none;">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function generatePortfolio() {
+    const notes = document.getElementById('projectNotes').value;
+    const code = document.getElementById('codeSnippets').value;
+    const btn = document.getElementById('generateBtn');
+    const placeholder = document.getElementById('placeholder');
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('caseStudyContent');
+
+    if (!notes.trim()) return alert("Notes are required for background context.");
+
+    btn.disabled = true;
+    placeholder.style.display = 'none';
+    loading.style.display = 'flex';
+    content.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/portfolio/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectNotes: notes, codeSnippets: code })
+        });
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("Non-JSON response received:", text);
+            throw new Error(`Server returned non-JSON response (${response.status}). Check server logs.`);
+        }
+
+        const data = await response.json();
+        if (!response.ok || data.error) throw new Error(data.error || `Server Error: ${response.status}`);
+
+        renderCaseStudy(data);
+    } catch (err) {
+        alert("System Error: " + err.message);
+        placeholder.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+    }
+}
+
+function renderCaseStudy(data) {
+    const content = document.getElementById('caseStudyContent');
+    content.innerHTML = `
+        <div class="case-study">
+            <h2>${data.title}</h2>
+            <div class="meta">
+                <div class="meta-item">ROLE <strong>${data.role}</strong></div>
+                <div class="meta-item">STACK <strong>${data.tech_stack.join(', ')}</strong></div>
+            </div>
+            
+            <div class="grid-sections">
+                <div class="section-card">
+                    <h4>The Challenge</h4>
+                    <p>${data.challenge}</p>
+                </div>
+                <div class="section-card">
+                    <h4>The Solution</h4>
+                    <p>${data.solution}</p>
+                </div>
+                <div class="section-card">
+                    <h4>Final Results</h4>
+                    <p>${data.results}</p>
+                </div>
+                <div class="section-card">
+                    <h4>AI Analysis</h4>
+                    <p>${data.summary}</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <label>Generated Markdown Source</label>
+                <div class="markdown-view">${data.case_study_markdown}</div>
+            </div>
+        </div>
+    `;
+    content.style.display = 'block';
+}
+
+// OS UI Handled via script
+</script>
+
+<script src="js/command-palette.js"></script>
+<script src="js/os-ui.js"></script>
+</body>
+</html>

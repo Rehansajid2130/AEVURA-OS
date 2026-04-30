@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contract Shield — Aevura OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/command-palette.css">
+<style>
+    :root {
+        --accent: #FF3E00;
+        --bg: #0a0a0a;
+        --surface: #141414;
+        --border: #2a2a2a;
+        --text: #e0e0e0;
+        --text-dim: #999;
+    }
+
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'JetBrains Mono', monospace;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+
+    .app-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 3rem;
+        gap: 20px;
+    }
+    .header-section h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -2px;
+        line-height: 0.9;
+        text-transform: uppercase;
+    }
+    .accent-dot { color: var(--accent); }
+
+    .btn-back {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        padding: 6px 12px;
+        font-family: inherit;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        height: fit-content;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 10px;
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .breadcrumb span { color: var(--text); }
+    @media (max-width: 768px) {
+        .breadcrumb { font-size: 8px; gap: 6px; }
+        .header-section h1 { font-size: 2.2rem; }
+    }
+
+    .generator-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 968px) {
+        .generator-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+        background: rgba(20, 20, 20, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        padding: 2.5rem;
+        position: relative;
+        box-shadow: 20px 20px 0px rgba(255, 62, 0, 0.05);
+    }
+
+    .integrity-meter {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2rem;
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+    .integrity-bar {
+        height: 4px;
+        width: 100px;
+        background: #222;
+        position: relative;
+    }
+    .integrity-fill {
+        position: absolute;
+        height: 100%;
+        background: var(--accent);
+        width: 100%;
+        box-shadow: 0 0 10px var(--accent);
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
+    input, textarea {
+        width: 100%;
+        background: #000;
+        border: 1px solid var(--border);
+        color: #fff;
+        padding: 0.8rem;
+        font-family: inherit;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    input:focus, textarea:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    .btn-generate {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 1rem 2rem;
+        font-family: inherit;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.1s;
+    }
+    .btn-generate:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0px var(--text);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 1rem 2rem;
+        font-family: inherit;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0px rgba(255, 62, 0, 0.2);
+    }
+
+    .result-panel {
+        background: #000;
+        border: 1px dashed var(--border);
+        min-height: 500px;
+        padding: 2.5rem;
+        position: relative;
+    }
+
+    .contract-preview {
+        background: #fff;
+        color: #000;
+        padding: 3rem;
+        font-family: 'Space Grotesk', sans-serif;
+        box-shadow: 15px 15px 0px var(--accent);
+        max-height: 700px;
+        overflow-y: auto;
+    }
+    .contract-preview h2 { font-size: 1.8rem; border-bottom: 4px solid #000; padding-bottom: 0.5rem; margin-top: 0; }
+    .contract-preview h3 { font-size: 1.2rem; margin-top: 2rem; border-left: 10px solid #000; padding-left: 1rem; }
+    .contract-preview p { font-size: 14px; margin-bottom: 1rem; }
+
+    .brutality-alert {
+        background: var(--accent);
+        color: #000;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+
+    .loading-overlay {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        justify-content: center;
+        height: 100%;
+    }
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #222;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); border-left: 1px solid var(--border); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 0; border: 1px solid var(--surface); }
+    * { scrollbar-width: thin; scrollbar-color: var(--accent) var(--surface); }
+
+    @media print {
+        body { background: #fff !important; color: #000 !important; }
+        .app-container { padding: 0 !important; max-width: none !important; }
+        .breadcrumb, .header-section, .panel, .btn-generate, .brutality-alert, #placeholder, #loading { 
+            display: none !important; 
+        }
+        .generator-grid { display: block !important; }
+        .result-panel { border: none !important; padding: 0 !important; min-height: 0 !important; background: transparent !important; }
+        .contract-preview { 
+            max-height: none !important; 
+            overflow: visible !important; 
+            box-shadow: none !important; 
+            padding: 0 !important;
+            border: none !important;
+        }
+    }
+
+    [data-theme="light"] input,
+    [data-theme="light"] textarea,
+    [data-theme="light"] .input-area,
+    [data-theme="light"] select {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #cccccc !important;
+    }
+    [data-theme="light"] input:focus,
+    [data-theme="light"] textarea:focus {
+        border-color: var(--accent) !important;
+        background: #fdfdfd !important;
+    }
+</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="breadcrumb">
+        SYSTEM / <span>MODULE 05</span> / <span>CONTRACT SHIELD</span>
+    </div>
+
+    <div class="header-section">
+        <h1>Iron-Clad<br>Agreements<span class="accent-dot">.</span></h1>
+        <a href="#" onclick="history.back(); return false;" class="btn-back">← Back</a>
+    </div>
+
+    <div class="generator-grid">
+        <div class="panel">
+            <div class="integrity-meter">
+                <span>Shield Integrity</span>
+                <div class="integrity-bar"><div class="integrity-fill"></div></div>
+                <span style="color: var(--accent)">HIGH</span>
+            </div>
+            <div class="form-group">
+                <label>Client Name / Entity</label>
+                <input type="text" id="clientName" placeholder="e.g. Acme Corp Inc.">
+            </div>
+            <div class="form-group">
+                <label>Project Name</label>
+                <input type="text" id="projectName" placeholder="e.g. E-commerce Platform Redesign">
+            </div>
+            <div class="form-group">
+                <label>Project Budget (Total)</label>
+                <input type="text" id="budget" placeholder="e.g. $5,000 USD">
+            </div>
+            <div class="form-group">
+                <label>Final Deadline</label>
+                <input type="text" id="deadline" placeholder="e.g. June 15, 2026">
+            </div>
+            <div class="form-group">
+                <label>Deliverables (One per line)</label>
+                <textarea id="deliverables" rows="5" placeholder="e.g. Home Page Design&#10;Stripe Integration&#10;Admin Dashboard"></textarea>
+            </div>
+            <button class="btn-generate" id="generateBtn" onclick="runGenerator()">
+                Generate Shield
+            </button>
+        </div>
+
+        <div class="result-panel" id="resultArea">
+            <div id="placeholder" style="text-align:center; margin-top: 150px; color: #333;">
+                // SYSTEM ARMED<br>
+                Enter project variables to architect a protective agreement.
+            </div>
+
+            <div class="loading-overlay" id="loading">
+                <div class="spinner"></div>
+                <div style="font-size: 11px; letter-spacing: 2px;">ARCHITECTING CLAUSES...</div>
+            </div>
+
+            <div id="contractResult" style="display:none;">
+                <div class="contract-preview" id="contractView"></div>
+                <div class="brutality-alert" id="brutalityNotes"></div>
+                
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button class="btn-generate" onclick="downloadDoc()">Download .DOC</button>
+                    <button class="btn-secondary" onclick="copyContract()">Copy Text</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function runGenerator() {
+    const clientName = document.getElementById('clientName').value;
+    const projectName = document.getElementById('projectName').value;
+    const budget = document.getElementById('budget').value;
+    const deadline = document.getElementById('deadline').value;
+    const deliverables = document.getElementById('deliverables').value.split('\n').filter(l => l.trim());
+
+    const btn = document.getElementById('generateBtn');
+    const placeholder = document.getElementById('placeholder');
+    const loading = document.getElementById('loading');
+    const resultDiv = document.getElementById('contractResult');
+
+    if (!clientName.trim() || !projectName.trim()) return alert("Error: Client and Project names are required.");
+
+    // Budget Validation: Must not be zero or empty
+    const cleanBudget = budget.replace(/[^0-9.]/g, '');
+    if (!cleanBudget || parseFloat(cleanBudget) <= 0) {
+        return alert("Error: Please enter a valid project budget (must be greater than zero).");
+    }
+
+    // Deadline Validation: Must not be empty
+    if (!deadline.trim()) {
+        return alert("Error: Please specify a project deadline.");
+    }
+
+    if (deliverables.length === 0) {
+        return alert("Error: Please list at least one deliverable.");
+    }
+
+    btn.disabled = true;
+    placeholder.style.display = 'none';
+    loading.style.display = 'flex';
+    resultDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/contract/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientName, projectName, budget, deliverables, deadline })
+        });
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error(`Server Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!response.ok || data.error) throw new Error(data.error || `Server Error: ${response.status}`);
+
+        renderContract(data);
+    } catch (err) {
+        alert("System Error: " + err.message);
+        placeholder.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+    }
+}
+
+function renderContract(data) {
+    const resultDiv = document.getElementById('contractResult');
+    const view = document.getElementById('contractView');
+    const notes = document.getElementById('brutalityNotes');
+
+    let html = `<h2>${data.contract_title}</h2>`;
+    html += `<p><strong>Client:</strong> ${data.client_name}</p>`;
+    html += `<p><strong>Project:</strong> ${data.project_name}</p>`;
+    
+    if (data.sections && Array.isArray(data.sections)) {
+        data.sections.forEach(sec => {
+            html += `<h3>${sec.heading}</h3><p>${sec.content}</p>`;
+        });
+    } else {
+        html += `<p>Warning: Contract sections could not be parsed structurally.</p>`;
+    }
+
+    view.innerHTML = html;
+    notes.innerHTML = `🛡️ DEFENSE NOTES: ${data.brutality_notes}`;
+    
+    resultDiv.style.display = 'block';
+}
+
+function downloadDoc() {
+    const content = document.getElementById('contractView').innerText;
+    const client = document.getElementById('clientName').value || "Client";
+    const blob = new Blob([content], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Contract_${client.replace(/\s+/g, '_')}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function copyContract() {
+    const content = document.getElementById('contractView').innerText;
+    navigator.clipboard.writeText(content).then(() => {
+        alert("Contract text copied to clipboard!");
+    });
+}
+
+// OS UI Handled via script
+</script>
+
+<script src="js/command-palette.js"></script>
+<script src="js/os-ui.js"></script>
+</body>
+</html>

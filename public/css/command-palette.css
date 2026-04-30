@@ -1,0 +1,140 @@
+/* 
+    AEVURA OS - COMMAND PALETTE HUD
+    Industrial / Brutalist Aesthetic
+*/
+
+:root {
+    --palette-bg: rgba(10, 10, 10, 0.95);
+    --palette-accent: #FF3E00;
+    --palette-border: #333;
+    --palette-text: #eee;
+    --palette-dim: #666;
+}
+
+#command-palette-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none; /* Hidden by default */
+    justify-content: center;
+    padding-top: 15vh;
+}
+
+#command-palette-overlay.active {
+    display: flex;
+}
+
+.palette-container {
+    width: 600px;
+    max-width: 90%;
+    background: var(--palette-bg);
+    border: 2px solid var(--palette-accent);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 62, 0, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    max-height: 60vh;
+}
+
+.palette-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--palette-border);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.palette-icon {
+    color: var(--palette-accent);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.palette-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.2rem;
+    width: 100%;
+    outline: none;
+}
+
+.palette-input::placeholder {
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.palette-results {
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.palette-item {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: 0.1s;
+}
+
+.palette-item:hover, .palette-item.selected {
+    background: #1a1a1a;
+    border-left-color: var(--palette-accent);
+}
+
+.palette-item .item-label {
+    display: flex;
+    flex-direction: column;
+}
+
+.palette-item .item-name {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.palette-item .item-desc {
+    color: var(--palette-dim);
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.palette-item .item-shortcut {
+    font-size: 10px;
+    color: var(--palette-dim);
+    border: 1px solid #333;
+    padding: 2px 6px;
+    text-transform: uppercase;
+}
+
+.palette-footer {
+    padding: 0.8rem 1.5rem;
+    border-top: 1px solid var(--palette-border);
+    background: #080808;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--palette-dim);
+    letter-spacing: 1px;
+}
+
+.palette-footer span b {
+    color: var(--palette-accent);
+}
+
+/* Animations */
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+#command-palette-overlay.active .palette-container {
+    animation: slideDown 0.2s ease-out;
+}

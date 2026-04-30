@@ -1,0 +1,960 @@
+# TemplateMo 619 – Axis Industrial
+## Complete CSS Documentation & Dark Mode Guide
+
+> **Template Source:** [https://templatemo.com/tm-619-axis-industrial](https://templatemo.com/tm-619-axis-industrial)
+> **CSS Files:** 4 files — `industrial.css` (base), `landing-page.css`, `main-page.css`, `the-observer.css`
+
+---
+
+## Table of Content
+1. [File Structure Overview](#1-file-structure-overview)
+2. [CSS Custom Properties (Variables)](#2-css-custom-properties-variables)
+3. [landing-page.css — Deep Dive](#3-landing-pagecss--deep-dive)
+4. [main-page.css — Deep Dive](#4-main-pagecss--deep-dive)
+5. [the-observer.css — Deep Dive](#5-the-observercss--deep-dive)
+6. [Shared Patterns Across Files](#6-shared-patterns-across-files)
+7. [Responsive Breakpoints Summary](#7-responsive-breakpoints-summary)
+8. [Dark Mode Implementation Guide](#8-dark-mode-implementation-guide)
+9. [How to Integrate Into Your Project](#9-how-to-integrate-into-your-project)
+
+---
+
+## 1. File Structure Overview
+
+The template splits its CSS into **one base file + three page-specific files**. Each page imports the base (`templatemo-axis-industrial.css`) and then its own file on top.
+
+| File | Purpose | Page |
+|---|---|---|
+| `templatemo-axis-industrial.css` | Global base styles, variables, utilities | All pages |
+| `templatemo-axis-landing-page.css` | Hero product section, spec grid, stat cards, CTA band, terminal log ticker | Landing / Product page |
+| `templatemo-axis-main-page.css` | Bento grid layout, sticky stack cards, index hero | Index / Home page |
+| `templatemo-axis-the-observer.css` | Shell + sidebar layout, radar hero, ribbon metrics, features grid, signal visualizer | The Observer page |
+
+---
+
+## 2. CSS Custom Properties (Variables)
+
+These variables are defined in the **base file** (`templatemo-axis-industrial.css`) and are used across all three page-specific files. You need to understand them before touching any component.
+
+### Color Palette
+
+```css
+--ink:      #0A0A08;   /* Near-black — used for dark backgrounds, borders, text */
+--base:     #F5F5F0;   /* Off-white — main background, light card surfaces */
+--surface:  #EDEDEA;   /* Slightly darker off-white — section backgrounds */
+--safety:   #FF3E00;   /* Bright orange-red — the brand accent color */
+--muted:    #888;      /* Medium grey — secondary text */
+
+/* Terminal / code block colors */
+--term-bg:    #0D0D0B;   /* Almost black — terminal/sidebar background */
+--term-green: #00FF66;   /* Bright green — terminal text, OK status */
+--term-amber: #FFAA00;   /* Amber — warning status in logs */
+```
+
+**Key design insight:** This template uses only 3 main colors (black, off-white, orange-red) plus terminal greens. There is no blue, purple, or typical "corporate" palette.
+
+### Typography Scale
+
+```css
+--fs-hero:     clamp(8rem, 22vw, 22rem);   /* Massive hero headings */
+--fs-h1:       clamp(2.5rem, 5vw, 4rem);   /* Section headings */
+--fs-h2:       clamp(1.8rem, 3vw, 2.8rem); /* Card/block headings */
+--fs-h3:       clamp(1.2rem, 2vw, 1.8rem); /* Sub-headings */
+--fs-data:     clamp(0.875rem, 1.2vw, 1rem); /* Body / data text */
+--fs-micro:    0.65rem;                    /* Labels, tags, metadata */
+--fs-spec-val: clamp(2rem, 4vw, 3.5rem);  /* Spec numbers / stat values */
+```
+
+All sizes use `clamp()` for fluid typography — they scale smoothly between a minimum and maximum value based on viewport width.
+
+### Spacing & Layout
+
+```css
+--gap:        clamp(1rem, 2vw, 2rem);   /* Grid gap — responsive */
+--header-h:   64px;                      /* Fixed header height */
+--sidebar-w:  340px;                     /* Observer page sidebar width */
+```
+
+### Borders & Shadows
+
+```css
+--border:        1px solid var(--ink);               /* Standard solid border */
+--border-thin:   1px solid rgba(10,10,8,0.12);        /* Subtle divider */
+--shadow:        8px 8px 0px var(--ink);              /* Hard drop shadow */
+--shadow-safety: 8px 8px 0px var(--safety);           /* Orange accent shadow */
+```
+
+**Design style note:** Hard/offset box shadows (no blur, solid color) give the template its brutalist/industrial look.
+
+---
+
+## 3. landing-page.css — Deep Dive
+
+This file styles the **product landing page** with a centered hero, spec grid, stat cards, a CTA band, and a scrolling terminal log.
+
+---
+
+### 3.1 Hero — Product Variant (`.hero--product`)
+
+```css
+.hero--product { --fs-hero: clamp(5rem, 18vw, 18rem); }
+```
+
+The product hero overrides the base hero font size to be slightly smaller than the default. It also adds a decorative circular ring overlaid on the background grid.
+
+```css
+.hero--product .hero__grid::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    border: 1px solid var(--safety);
+    border-radius: 50%;
+    opacity: 0.15;
+}
+```
+
+This `::after` pseudo-element creates a faint orange circle centered in the hero — a subtle industrial targeting/crosshair aesthetic.
+
+**Child elements:**
+
+| Class | Purpose |
+|---|---|
+| `.hero__subtitle` | Uppercase subtitle in `Space Grotesk` bold, muted color |
+| `.hero__actions` | Flex row of CTA buttons, centered, wraps on mobile |
+| `.hero__coords` | Bottom-left decorative coordinate text (opacity 0.2) |
+| `.hero__version` | Bottom-right decorative version text (opacity 0.2) |
+
+---
+
+### 3.2 Product Details Section (`.details__inner`)
+
+Uses a **12-column CSS Grid**. The layout is split:
+
+- Left column (`.details__left`) → spans **5 columns** — text description
+- Right column (`.details__right`) → spans **7 columns** — stat cards in a 2-column sub-grid
+
+```css
+.details__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gap);
+    align-items: start;
+}
+```
+
+**Breakpoints:**
+- `≤ 1024px` → Both columns expand to `span 12` (stack vertically)
+
+---
+
+### 3.3 Stat Cards (`.stat-card`)
+
+Stat cards are bordered boxes showing a metric label + large number value.
+
+```css
+.stat-card {
+    border: var(--border);
+    padding: clamp(1.2rem, 2vw, 2rem);
+    background: var(--base);
+    box-shadow: var(--shadow);
+    transition: none;  /* No CSS transition — hover is instant */
+}
+
+.stat-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}
+```
+
+**Hover effect:** The card shifts up-left by 4px and the shadow extends — creates a "lifting" illusion without smooth animation (intentionally mechanical).
+
+**Variants:**
+
+| Class | Background | Shadow color on hover |
+|---|---|---|
+| `.stat-card` (default) | `--base` (off-white) | `--ink` (black) |
+| `.stat-card--dark` | `--ink` (black) | `--safety` (orange) |
+
+**Inner elements:**
+
+| Class | Description |
+|---|---|
+| `.stat-card__label` | Tiny uppercase label with wide letter-spacing |
+| `.stat-card__value` | Large number in `Space Grotesk` bold, tight letter-spacing |
+| `.stat-card__unit` | Smaller unit text (e.g., "kg", "°C") — `0.4em` size, semi-transparent |
+
+---
+
+### 3.4 Spec Grid (`.spec-grid`)
+
+A 4-column grid of specification cells with shared borders (no gap — borders overlap).
+
+```css
+.spec-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: var(--border);
+    box-shadow: var(--shadow);
+}
+```
+
+**Border logic for the grid:**
+- Every cell has `border-right` and `border-bottom`
+- `.spec-cell:nth-child(4n)` → removes right border (last column)
+- `.spec-cell:nth-last-child(-n+4)` → removes bottom border (last row)
+
+This creates a seamless joined-border grid without double-borders.
+
+**Breakpoints:**
+- `≤ 1024px` → 2 columns
+- `≤ 768px` → 1 column (stacked)
+
+**Spec Cell Variants:**
+
+| Class | Background | Text | Hover |
+|---|---|---|---|
+| Default | `--base` | `--ink` | `--ink` bg, `--base` text |
+| `.spec-cell--dark` | `--ink` | `--base` | `--safety` bg |
+| `.spec-cell--safety` | `--safety` | `--base` | `--ink` bg |
+
+**Inner elements of `.spec-cell`:**
+
+| Class | Description |
+|---|---|
+| `.spec-cell__id` | Tiny cell ID (e.g., `SPEC-01`) |
+| `.spec-cell__label` | Uppercase metric name |
+| `.spec-cell__value` | Large numeric value in `Space Grotesk` |
+| `.spec-cell__unit` | Monospace unit string (e.g., `rpm`, `MPa`) |
+| `.spec-cell__note` | Small descriptive note at bottom |
+
+---
+
+### 3.5 CTA Band (`.cta-band`)
+
+A centered call-to-action section with title, body text, and buttons.
+
+```css
+.cta-band__inner { max-width: 700px; margin: 0 auto; }
+.cta-band__title { font-size: var(--fs-h1); }
+.cta-band__text  { opacity: 0.5; line-height: 1.9; }
+.cta-band__actions { display: flex; gap: 1rem; justify-content: center; }
+```
+
+---
+
+### 3.6 Terminal Log (`.log`)
+
+A horizontally scrolling ticker that mimics a terminal output stream.
+
+```css
+.log { background: var(--term-bg); border-bottom: 2px solid var(--safety); }
+```
+
+**How the animation works:**
+
+```css
+.log__track {
+    display: flex;
+    width: max-content;
+    animation: tickerScroll 40s linear infinite;
+}
+.log__track--reverse {
+    animation-direction: reverse;
+    animation-duration: 55s;
+}
+```
+
+Two tracks scroll in opposite directions at different speeds, creating a layered live-feed effect.
+
+**The mask fade:**
+```css
+.log__body {
+    mask-image: linear-gradient(90deg, transparent 0%, black 4%, black 96%, transparent 100%);
+}
+```
+
+This fades out the left and right edges of the ticker so entries appear to scroll in from the side naturally.
+
+**Log entry types (color coding):**
+
+| Class | Color | Border | Meaning |
+|---|---|---|---|
+| `.log-ok` | `--term-green` | Green tint | OK / success |
+| `.log-warn` | `--term-amber` | Amber tint | Warning |
+| `.log-sys` | `--safety` | Orange tint | System message |
+
+---
+
+## 4. main-page.css — Deep Dive
+
+This file styles the **home/index page** with a dense hero grid, a bento-layout card grid, and sticky-scroll stack cards.
+
+---
+
+### 4.1 Dense Hero Grid (`.hero__grid--dense`)
+
+```css
+.hero__grid--dense {
+    background-size: 60px 60px;
+    opacity: 0.04;
+    background-image:
+        linear-gradient(var(--ink) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ink) 1px, transparent 1px);
+}
+```
+
+A very faint grid overlay on the hero background — pure CSS, no images needed. At `opacity: 0.04` it's barely visible, just adding industrial texture.
+
+---
+
+### 4.2 Bento Grid (`.bento__grid`)
+
+A 12-column grid with auto-rows — the "bento box" layout popular in modern design.
+
+```css
+.bento__grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(180px, auto);
+    gap: var(--gap);
+}
+```
+
+**Column span classes:**
+
+| Class | Columns |
+|---|---|
+| `.bento-card--wide` | 8 of 12 |
+| `.bento-card--mid` | 6 of 12 (half) |
+| `.bento-card--narrow` | 4 of 12 (third) |
+| `.bento-card--tall` | `grid-row: span 2` (double height) |
+
+**Breakpoints:**
+- `≤ 1024px` → Wide, mid, and narrow all collapse to `span 6`
+- `≤ 768px` → All collapse to `1 / -1` (full width), tall loses double height
+
+**Decorative circle on cards:**
+```css
+.bento-card__visual {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    width: 120px;
+    height: 120px;
+    border: 3px solid currentColor;
+    border-radius: 50%;
+    opacity: 0.08;
+}
+```
+
+A decorative circle bleeds slightly outside the card — a subtle industrial/technical aesthetic touch.
+
+---
+
+### 4.3 Sticky Stack Cards (`.stack__card`)
+
+This is the most complex component in the main page — cards that **stack on top of each other as you scroll** using CSS `position: sticky`.
+
+```css
+.stack__card {
+    position: sticky;
+    top: 80px;   /* First card sticks at 80px from top */
+    border: var(--border);
+    box-shadow: var(--shadow);
+    background: var(--base);
+    padding: clamp(2rem, 4vw, 4rem);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gap);
+    transition: none;
+}
+```
+
+**Each subsequent card has a higher `top` value** so they stack with an offset:
+
+```css
+.stack__card:nth-child(1) { top: 80px;  background: var(--base); }
+.stack__card:nth-child(2) { top: 110px; background: #F5F5F0; }
+.stack__card:nth-child(3) { top: 140px; background: var(--ink); color: var(--base); }
+.stack__card:nth-child(4) { top: 170px; background: #F0F0EB; }
+```
+
+As you scroll, card 1 sticks, then card 2 slides over it and sticks slightly lower, then card 3 covers both, etc. This creates a layered "stacking deck" scroll experience.
+
+**Card 3 (dark) is special** — it has the `--ink` background and orange accent shadow:
+```css
+.stack__card:nth-child(3) { box-shadow: var(--shadow-safety); }
+.stack__card:nth-child(3):hover { box-shadow: 12px 12px 0px var(--safety); }
+```
+
+**Internal card layout:**
+
+- Left (`.stack__card-left`) → spans 4 columns → large step number
+- Right (`.stack__card-right`) → spans 8 columns → title, description, tags
+
+The step number:
+```css
+.stack__card-step {
+    font-size: clamp(4rem, 8vw, 7rem);
+    opacity: 0.12;   /* Very faint — purely decorative */
+    letter-spacing: -0.05em;
+}
+```
+
+**On mobile** (`≤ 768px`): `position: relative` overrides sticky — cards just stack normally in the flow. The `top: auto !important` removes the sticky offset.
+
+---
+
+## 5. the-observer.css — Deep Dive
+
+The most complex page — a **two-panel shell** with a main content area and a fixed terminal sidebar. It includes a radar-sweep hero, a metrics ribbon, a features grid, and a signal visualizer.
+
+---
+
+### 5.1 Shell Layout (`.shell`)
+
+```css
+.shell {
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-w, 340px);
+    min-height: 100vh;
+}
+```
+
+The outer page wrapper is a 2-column grid. The sidebar is a fixed 340px wide. At `≤ 1024px`, this collapses to 1 column and the sidebar becomes a hidden off-canvas panel.
+
+---
+
+### 5.2 Radar Hero (`.hero--radar`)
+
+```css
+.hero--radar { --fs-hero: clamp(3.5rem, 10vw, 10rem); }
+```
+
+Smaller hero font size than other variants (data/dashboard feel, not marketing).
+
+**Decorative radar rings:**
+
+```css
+.hero__ring:nth-child(1) { width: 200px;  height: 200px; }
+.hero__ring:nth-child(2) { width: 400px;  height: 400px; }
+.hero__ring:nth-child(3) { width: 650px;  height: 650px; }
+.hero__ring:nth-child(4) { width: 950px;  height: 950px; }
+```
+
+Four concentric circles centered around a point (45% from left, 30% from top) — gives an off-center radar / sonar look.
+
+**The sweeping arm animation:**
+```css
+.hero__ring:nth-child(1)::after {
+    content: '';
+    width: 475px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--safety), transparent);
+    transform-origin: 0 0;
+    animation: sweepArm 8s linear infinite;
+}
+
+@keyframes sweepArm {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+```
+
+A horizontal line (gradient from orange to transparent) rotates 360° continuously from its left end — mimicking a radar sweep.
+
+---
+
+### 5.3 Metrics Ribbon (`.ribbon`)
+
+A horizontal 5-column strip of quick metrics below the hero.
+
+```css
+.ribbon {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-bottom: var(--border);
+}
+```
+
+**Notable cell behavior:**
+- Cell 3 (`.ribbon__cell:nth-child(3)`) is dark by default — a visual highlight in the middle of the ribbon
+- On hover → cells invert to `--ink` background with white text
+- Cell 3 on hover → changes to `--safety` orange
+
+**Breakpoints:**
+- `≤ 1024px` → 3 columns
+- `≤ 768px` → 2 columns
+- `≤ 480px` → 1 column
+
+---
+
+### 5.4 Features Grid (`.features__grid`)
+
+A 3-column grid of feature cards with joined borders (same pattern as the spec grid in landing page).
+
+```css
+.features__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: var(--border);
+}
+```
+
+**Border removal rules:**
+- `nth-child(3n)` → no right border (last in each row)
+- `nth-last-child(-n+3)` → no bottom border (last row)
+
+**Feature Card Variants:**
+
+| Class | BG | Text | Hover |
+|---|---|---|---|
+| Default | `--base` | `--ink` | `--ink` bg |
+| `.feat-card--dark` | `--ink` | `--base` | `--safety` bg |
+| `.feat-card--safety` | `--safety` | `--base` | `--ink` bg |
+
+**Spark bars in feature cards:**
+```css
+.feat-card .spark__bar          { background: var(--safety); }
+.feat-card--dark .spark__bar    { background: var(--term-green); }
+.feat-card--safety .spark__bar  { background: var(--base); }
+.feat-card:hover .spark__bar    { background: var(--safety); }
+```
+
+Spark bars change color depending on which card variant they're inside — and change again on hover.
+
+---
+
+### 5.5 Signal Visualizer (`.signal__viz`)
+
+A live animated bar chart inside a dark panel — simulates a signal or frequency visualization.
+
+```css
+.signal__viz {
+    border: var(--border);
+    background: var(--ink);
+    padding: 1.5rem;
+    color: var(--base);
+}
+```
+
+**Animation:**
+```css
+.signal__viz-bar {
+    flex: 1;
+    background: var(--term-green);
+    opacity: 0.6;
+    animation: waveBar 1.5s ease-in-out infinite alternate;
+}
+
+.signal__viz-bar:nth-child(3n) { background: var(--safety); }
+.signal__viz-bar:nth-child(7n) { background: var(--term-amber); }
+
+@keyframes waveBar {
+    0%   { height: 15%; }
+    25%  { height: 65%; }
+    50%  { height: 30%; }
+    75%  { height: 80%; }
+    100% { height: 20%; }
+}
+```
+
+Each bar animates height between keyframes. Odd bars, 3n bars, and 7n bars have `animation-delay` offsets so bars don't all move in sync — creates an organic wave pattern. Every 3rd bar is orange, every 7th is amber, rest are green.
+
+---
+
+### 5.6 Terminal Sidebar (`.sidebar`)
+
+A fixed-position dark panel on the right side — the most complex single component in the template.
+
+```css
+.sidebar {
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
+    width: var(--sidebar-w, 340px);
+    height: calc(100vh - var(--header-h));
+    background: var(--term-bg);
+    border-left: var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 900;
+    overflow: hidden;
+}
+```
+
+**Sidebar sections (top to bottom):**
+
+1. **Header** (`.sidebar__header`) — Title with pulsing green dot + metadata
+2. **Stats row** (`.sidebar__stats`) — 3-column mini stats grid
+3. **Mini chart** (`.sidebar__chart`) — Bar chart with green/orange columns
+4. **Log scroll** (`.sidebar__log`) — Auto-scrolling terminal log
+5. **Footer** (`.sidebar__footer`) — Tiny metadata row
+
+**The auto-scrolling log:**
+```css
+.sidebar__log-track {
+    animation: logScrollV 60s linear infinite;
+}
+
+@keyframes logScrollV {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+}
+```
+
+The log duplicates its content (2× height), then scrolls by exactly `-50%` — creating seamless infinite vertical scrolling.
+
+**Fade masks on log:**
+```css
+.sidebar__log::before { top: 0;    background: linear-gradient(var(--term-bg), transparent); }
+.sidebar__log::after  { bottom: 0; background: linear-gradient(transparent, var(--term-bg)); }
+```
+
+Top and bottom edges fade out — entries appear to emerge from and disappear into the terminal.
+
+**Mobile toggle:**
+```css
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1100;
+    width: 48px;
+    height: 48px;
+    background: var(--ink);
+    color: var(--term-green);
+    border: 2px solid var(--safety);
+}
+```
+
+At `≤ 1024px`, the sidebar is hidden and a toggle button appears in the bottom-right corner. Clicking it adds/removes the `.open` class.
+
+---
+
+## 6. Shared Patterns Across Files
+
+### 6.1 The "Hard Hover" Pattern
+
+All cards and interactive elements use `transition: none` — hover effects are **instant**, not animated. Combined with the translate + shadow shift, this creates a mechanical, deliberate feel.
+
+```css
+/* This pattern repeats across all files */
+.card { transition: none; }
+.card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}
+```
+
+### 6.2 The About Section
+
+All three pages have an identical `.about` section at the bottom:
+
+```css
+.about { padding: ...; border-bottom: var(--border); background: var(--surface); }
+.about__inner { max-width: 760px; margin: 0 auto; text-align: center; }
+```
+
+### 6.3 Typography Fonts
+
+All three files use the same font stack (defined in the base):
+- **Headings / numbers:** `Space Grotesk` — geometric sans-serif
+- **Body text:** Implied sans (base style)
+- **Monospace / code / units:** `JetBrains Mono`
+
+---
+
+## 7. Responsive Breakpoints Summary
+
+| Breakpoint | What changes |
+|---|---|
+| `≤ 1024px` | 12-col grids go to 6-col, sidebar hides, spec grid to 2-col, ribbon to 3-col |
+| `≤ 768px` | All multi-column layouts go to 1-col, stack cards lose sticky, buttons go full-width |
+| `≤ 480px` | Ribbon stacks to 1-col, CTA actions stack vertically, all buttons full-width |
+
+---
+
+## 8. Dark Mode Implementation Guide
+
+> ⚠️ **This template has NO built-in dark mode.** Every color is hardcoded — `--base` is always off-white, `--ink` is always near-black. There is no `prefers-color-scheme` or dark class variant anywhere.
+
+Here is a **complete dark mode system** you can add to your project.
+
+---
+
+### 8.1 Understanding What Needs to Flip
+
+The template uses a light-on-dark/dark-on-light duality already — many components have a `--dark` variant with inverted colors. Dark mode is essentially **making the page default look like those `--dark` variants**.
+
+**Colors that need to flip:**
+
+| Variable | Light Mode | Dark Mode |
+|---|---|---|
+| `--base` | `#F5F5F0` (off-white) | `#0A0A08` (near-black) |
+| `--ink` | `#0A0A08` (near-black) | `#F5F5F0` (off-white) |
+| `--surface` | `#EDEDEA` | `#141412` |
+| `--muted` | `#888` | `#666` |
+| `--safety` | `#FF3E00` ← **stays the same** | `#FF3E00` |
+| `--term-bg` | `#0D0D0B` ← **stays the same** | `#0D0D0B` |
+| `--shadow` | `8px 8px 0 #0A0A08` | `8px 8px 0 rgba(245,245,240,0.15)` |
+| `--shadow-safety` | `8px 8px 0 #FF3E00` ← **stays the same** | `8px 8px 0 #FF3E00` |
+| `--border` | `1px solid #0A0A08` | `1px solid rgba(245,245,240,0.15)` |
+| `--border-thin` | `1px solid rgba(10,10,8,0.12)` | `1px solid rgba(245,245,240,0.08)` |
+
+---
+
+### 8.2 Recommended Implementation — CSS Class Toggle
+
+**Step 1:** Add this to your base CSS (in `templatemo-axis-industrial.css` or a new file):
+
+```css
+/* === DARK MODE OVERRIDES === */
+/* Add class="dark" to <html> or <body> to activate */
+
+html.dark {
+    --base:        #0A0A08;
+    --ink:         #F5F5F0;
+    --surface:     #141412;
+    --muted:       #666666;
+    --border:      1px solid rgba(245, 245, 240, 0.15);
+    --border-thin: 1px solid rgba(245, 245, 240, 0.08);
+    --shadow:      8px 8px 0px rgba(245, 245, 240, 0.12);
+}
+```
+
+The `--safety`, `--term-bg`, `--term-green`, and `--term-amber` stay the same — they already work on dark backgrounds.
+
+**Step 2:** Override components that hardcode colors directly:
+
+```css
+/* Stat cards with hardcoded backgrounds */
+html.dark .stat-card {
+    background: #1A1A18;
+    box-shadow: var(--shadow);
+}
+
+html.dark .stat-card--dark {
+    background: #F5F5F0;
+    color: #0A0A08;
+}
+
+/* Stack cards with hardcoded backgrounds */
+html.dark .stack__card:nth-child(2) { background: #1C1C1A; }
+html.dark .stack__card:nth-child(4) { background: #181816; }
+
+/* Surface sections */
+html.dark .about { background: #111110; }
+
+/* Bento visual circles — currentColor will now be light */
+/* No override needed — currentColor adapts automatically */
+```
+
+**Step 3:** Add a toggle button and JavaScript:
+
+```html
+<!-- Add this button in your nav or header -->
+<button id="dark-toggle" aria-label="Toggle dark mode">
+    <span id="theme-icon">☀</span>
+</button>
+```
+
+```javascript
+// Dark mode toggle logic
+const html = document.documentElement;
+const toggle = document.getElementById('dark-toggle');
+const icon = document.getElementById('theme-icon');
+
+// On load — restore saved preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    html.classList.add('dark');
+    icon.textContent = '☽';
+}
+
+// Toggle on click
+toggle.addEventListener('click', () => {
+    const isDark = html.classList.toggle('dark');
+    icon.textContent = isDark ? '☽' : '☀';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
+```
+
+---
+
+### 8.3 Alternative — System Preference Only (No Toggle)
+
+If you want dark mode to follow the OS setting automatically without a toggle button:
+
+```css
+@media (prefers-color-scheme: dark) {
+    :root {
+        --base:        #0A0A08;
+        --ink:         #F5F5F0;
+        --surface:     #141412;
+        --muted:       #666666;
+        --border:      1px solid rgba(245, 245, 240, 0.15);
+        --border-thin: 1px solid rgba(245, 245, 240, 0.08);
+        --shadow:      8px 8px 0px rgba(245, 245, 240, 0.12);
+    }
+
+    /* Override hardcoded backgrounds */
+    .stat-card { background: #1A1A18; }
+    .stack__card:nth-child(2) { background: #1C1C1A; }
+    .stack__card:nth-child(4) { background: #181816; }
+    .about { background: #111110; }
+}
+```
+
+---
+
+### 8.4 Dark Mode Styling Notes Per Component
+
+**Terminal Sidebar & Log** — Already dark by default (`var(--term-bg)` = `#0D0D0B`). In dark mode, the sidebar will still look correct. You may want to darken its border:
+
+```css
+html.dark .sidebar { border-left-color: rgba(245,245,240,0.08); }
+```
+
+**Hero Grid Lines** — The grid uses `var(--ink)` for line color. When `--ink` flips to off-white, the grid lines will become white on a black background — this works correctly without any extra overrides.
+
+**Buttons** — If buttons use `background: var(--ink)` and `color: var(--base)`, they'll automatically flip correctly. But if any button has hardcoded `background: #0A0A08`, add an override.
+
+**Images and SVGs** — If the template uses any `filter: invert()` images, you may need:
+```css
+html.dark img.invert-on-dark { filter: invert(1); }
+```
+
+**The `.spec-cell--dark` and `.feat-card--dark` components** — These already use `--ink` for their dark backgrounds, so when `--ink` flips to off-white in dark mode, they become light cards. You'll want to preserve their dark look:
+
+```css
+html.dark .spec-cell--dark,
+html.dark .feat-card--dark {
+    background: #1A1A18;   /* Keep them dark in dark mode */
+    color: #F5F5F0;
+}
+```
+
+---
+
+### 8.5 Dark Mode Toggle Button Styling (Axis Theme)
+
+Style the toggle to match the template's industrial aesthetic:
+
+```css
+#dark-toggle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 0.8rem;
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: none;
+}
+
+#dark-toggle:hover {
+    background: var(--ink);
+    color: var(--base);
+}
+
+html.dark #dark-toggle {
+    border-color: var(--ink);   /* --ink is now off-white */
+    color: var(--ink);
+}
+
+html.dark #dark-toggle:hover {
+    background: var(--safety);
+    border-color: var(--safety);
+    color: var(--base);
+}
+```
+
+---
+
+## 9. How to Integrate Into Your Project
+
+### 9.1 CSS Load Order
+
+Always load files in this order — the base file must come first:
+
+```html
+<link rel="stylesheet" href="templatemo-axis-industrial.css">
+
+<!-- Then load ONLY the page-specific file for the current page -->
+<link rel="stylesheet" href="templatemo-axis-landing-page.css">
+<!-- OR -->
+<link rel="stylesheet" href="templatemo-axis-main-page.css">
+<!-- OR -->
+<link rel="stylesheet" href="templatemo-axis-the-observer.css">
+```
+
+Never load all three page files at once — class names overlap (e.g., `.about`, `.cta`) and they'll conflict.
+
+### 9.2 Required Fonts (Google Fonts)
+
+Add these in your `<head>` before the CSS:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+```
+
+### 9.3 Minimum HTML Skeleton for Each Page
+
+**For The Observer page** — you need the shell wrapper:
+```html
+<div class="shell">
+    <main class="shell__main">
+        <!-- your content -->
+    </main>
+    <aside class="sidebar">
+        <!-- terminal sidebar -->
+    </aside>
+</div>
+<button class="sidebar-toggle" id="sidebarToggle">LOG</button>
+```
+
+With this JS:
+```javascript
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('open');
+});
+```
+
+**For the Main page** — sticky stack cards need a parent with enough height:
+```html
+<section class="stack">
+    <div class="stack__header">...</div>
+    <!-- Each card must be a direct child for sticky to work -->
+    <div class="stack__card">...</div>
+    <div class="stack__card">...</div>
+    <div class="stack__card">...</div>
+    <div class="stack__card">...</div>
+</section>
+```
+
+### 9.4 If You Need HTML Reference Files
+
+The CSS references many class names that need proper HTML structure to work correctly. Classes like `.spec-grid > .spec-cell`, `.bento__grid > .bento-card`, and `.ribbon > .ribbon__cell` all depend on specific nesting.
+
+> **Let me know and I'll generate the full HTML for any or all of the pages.** I can produce a ready-to-use HTML file that matches all the CSS selectors so you can drop it straight into your project.
+
+---
+
+*Documentation generated from: `templatemo-axis-landing-page.css`, `templatemo-axis-main-page.css`, `templatemo-axis-the-observer.css`*
+*Template: TemplateMo 619 Axis Industrial — https://templatemo.com/tm-619-axis-industrial*

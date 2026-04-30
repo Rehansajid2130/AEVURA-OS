@@ -1,0 +1,59 @@
+{
+  "daxafec732@mugstock.com": {
+    "profile": {
+      "name": "adasdlkj",
+      "email": "daxafec732@mugstock.com",
+      "location": "lahore",
+      "is_freelancer": false,
+      "freelance_skills": [],
+      "learning_intent": "new-skill",
+      "target_skill": "reactjs,javascript",
+      "current_level": "Beginner",
+      "tools": [
+        "cursor",
+        "gemini",
+        "figma"
+      ],
+      "primary_goal": "both",
+      "strengths": [],
+      "weaknesses": [],
+      "preferences": {
+        "learning_style": "Not yet determined",
+        "work_type": "Learning"
+      },
+      "simScenario": "late-payment",
+      "simCustomDesc": "",
+      "simHistory": [
+        {
+          "role": "client",
+          "content": "(System: Simulation Started - Scenario: late-payment)"
+        },
+        {
+          "role": "user",
+          "content": "(Handshake: User joins the chat)"
+        },
+        {
+          "role": "client",
+          "content": "Oh, hey there! Good to hear from you. I was just about to reach out actually. About that invoice... I'm so sorry, but we've had a bit of a snag with our accounting department this week. Our main finance person is out sick, and things are just a bit backed up. I'm sure it'll be sorted soon, but it might take a few extra days."
+        },
+        {
+          "role": "user",
+          "content": "no"
+        },
+        {
+          "role": "client",
+          "content": "No? What do you mean 'no'? I just explained the situation. Our finance person is genuinely out sick, and we can't process payments without them. It's completely out of my hands right now. I'm just asking for a little understanding and a few more days until they're back."
+        },
+        {
+          "role": "user",
+          "content": "no"
+        },
+        {
+          "role": "client",
+          "content": "Mock: That looks good, but can we just add one more page for the same price? It should be super simple for you!"
+        }
+      ]
+    },
+    "passwordHash": "d2VsY29uMjEzMA=="
+  }
+}

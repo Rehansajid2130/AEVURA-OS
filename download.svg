@@ -1,0 +1,11 @@
+<svg width="100" height="100" viewBox="0 0 70 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (optional) -->
+  <!-- <rect width="100%" height="100%" fill="#000000"/> -->
+
+  <!-- > symbol -->
+  <path d="M16 18 L32 32 L16 46" stroke="#F5F5F0" stroke-width="7" fill="none" stroke-linecap="square" stroke-linejoin="miter"></path>
+
+  <!-- _ (cursor) -->
+  <rect x="36" y="40" width="30" height="7" fill="#FF3E00"></rect>
+
+</svg>

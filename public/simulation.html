@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-World Simulation — Aevura OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/command-palette.css">
+    <style>
+        :root {
+            --accent: #FF3E00;
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
+            --text: #e0e0e0;
+            --text-dim: #999;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 3rem;
+            gap: 20px;
+        }
+        .header-section h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            margin: 0;
+        }
+        .accent-dot { color: var(--accent); }
+
+        .chat-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            height: 70vh;
+            min-height: 500px;
+        }
+
+        .chat-layout { display: flex; flex: 1; height: 100%; min-height: 0; overflow: hidden; }
+        /* Sidebar Scenarios */
+        .sim-sidebar { 
+            width: 300px; 
+            border-right: 1px solid var(--border); 
+            padding: 20px; 
+            background: #0c0c0c; 
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        #scenario-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 5px;
+        }
+        #scenario-list::-webkit-scrollbar { width: 4px; }
+        #scenario-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        
+        .scenario-card {
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .scenario-card:hover { border-color: var(--accent); }
+        .scenario-card.active { border-color: var(--accent); background: #1a0a05; }
+        .scenario-title { font-size: 13px; color: #fff; margin-bottom: 5px; font-weight: 700; }
+        .scenario-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+            transition: all 0.2s;
+            display: none; 
+            margin-left: 10px;
+        }
+        .scenario-card:hover .delete-btn { display: block; }
+        .delete-btn:hover { color: var(--accent); transform: scale(1.2); }
+
+        /* Main Chat Area */
+        .chat-main { flex: 1; display: flex; flex-direction: column; position: relative; background: #080808; min-height: 0; overflow: hidden; }
+        .messages { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .messages { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px;
+            min-height: 0;
+        }
+        
+        .msg { max-width: 80%; padding: 15px 20px; font-size: 14px; line-height: 1.6; position: relative; }
+        .msg-client { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: #fff; }
+        .msg-user { align-self: flex-end; background: var(--accent); color: #000; font-weight: 500; }
+        .msg-system { align-self: center; font-size: 11px; color: var(--accent); opacity: 0.7; font-style: italic; text-transform: uppercase; letter-spacing: 1px; }
+
+        .input-area { padding: 20px; background: #000; border-top: 1px solid var(--border); display: flex; gap: 15px; }
+        input[type="text"] {
+            flex: 1;
+            background: #111;
+            border: 1px solid var(--border);
+            padding: 12px 18px;
+            color: #fff;
+            font-family: inherit;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--accent); }
+        
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 14px 25px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:hover:not(:disabled) { background: #fff; }
+        button:disabled { background: #444; cursor: not-allowed; }
+
+        /* Mobile Tab Switcher */
+        .sim-tabs { display: none; }
+        @media (max-width: 768px) {
+            .sim-tabs {
+                display: flex;
+                background: #000;
+                border-bottom: 1px solid var(--border);
+                width: 100%;
+                z-index: 50;
+            }
+            .sim-tab {
+                flex: 1;
+                padding: 12px;
+                background: none;
+                border: none;
+                color: var(--text-dim);
+                font-size: 9px;
+                letter-spacing: 2px;
+                text-align: center;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+            }
+            .sim-tab.active {
+                color: var(--accent);
+                border-bottom-color: var(--accent);
+                background: rgba(255,62,0,0.05);
+            }
+
+            .delete-btn { 
+                display: block !important; 
+                opacity: 0.6;
+                font-size: 14px;
+            }
+            
+            .chat-layout { position: relative; }
+            .sim-sidebar {
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                z-index: 10;
+                border-right: none;
+                display: none;
+            }
+            .sim-sidebar.active { display: flex; }
+            
+            .input-area {
+                padding: 12px;
+                gap: 8px;
+            }
+            .input-area button {
+                padding: 0 15px;
+            }
+        }
+
+        /* Custom Scenario Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000;
+        }
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+        .modal-card h3 { margin-bottom: 20px; font-size: 1.5rem; color: #fff; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; }
+        .modal-card input, .modal-card textarea {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        .modal-card textarea { height: 120px; resize: none; }
+        .modal-card label { display: block; font-size: 10px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Feedback Overlay */
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 100;
+        }
+        .feedback-card {
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            padding: 60px;
+            max-width: 700px;
+            text-align: center;
+        }
+        .score { font-size: 80px; font-weight: 700; color: var(--accent); font-family: 'Space Grotesk', sans-serif; margin-bottom: 10px; }
+        .score-label { font-size: 11px; color: var(--text-dim); letter-spacing: 4px; margin-bottom: 40px; }
+        .critique { font-size: 16px; color: #eee; line-height: 1.7; margin-bottom: 30px; }
+        .tips-list { text-align: left; margin-bottom: 40px; }
+        .tips-list li { font-size: 13px; color: #aaa; margin-bottom: 10px; padding-left: 25px; position: relative; list-style: none; }
+        .tips-list li::before { content: ">"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            align-self: flex-start;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 15px 24px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .msg { font-size: 12px; padding: 10px 15px; max-width: 90%; }
+            .typing-indicator { padding: 10px 16px; }
+            .typing-indicator span { width: 5px; height: 5px; }
+        }
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @media (max-width: 768px) {
+            .breadcrumb { font-size: 8px; gap: 6px; }
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 14px;
+            font-family: inherit;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+    <div class="app-container">
+        <div class="breadcrumb">
+            SYSTEM / <span>MODULE 02</span> / <span>SIMULATION MODE</span>
+        </div>
+
+        <div class="header-section">
+            <h1>Reality<br>Simulator<span class="accent-dot">.</span></h1>
+            <a href="#" onclick="history.back(); return false;" class="btn-back" style="margin-bottom: 5px;">← Back</a>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-layout">
+                <div class="sim-sidebar active" id="sim-sidebar">
+                    <div id="scenario-list">
+                        <div class="scenario-card active" onclick="selectScenario('scope-creep', this)">
+                            <div class="scenario-title">The Scope Creeper</div>
+                            <div class="scenario-desc">A "friendly" client who keeps asking for free extra features.</div>
+                        </div>
+                        <div class="scenario-card" onclick="selectScenario('late-payment', this)">
+                            <div class="scenario-title">The Late Payer</div>
+                            <div class="scenario-desc">Excuses, delays, and ghosting. Secure your payment professionally.</div>
+                        </div>
+                        <div class="scenario-card" onclick="selectScenario('perfectionist', this)">
+                            <div class="scenario-title">The Vague Perfectionist</div>
+                            <div class="scenario-desc">Feedback is always "I'll know it when I see it." Needs structure.</div>
+                        </div>
+                    </div>
+
+                    <div style="border-top:1px dashed var(--border); margin: 20px 0;"></div>
+                    
+                    <button id="addModeBtn" onclick="openModal()" style="width: 100%; padding: 12px; font-size: 10px; background: transparent; border: 1px solid var(--border); color: var(--text-dim);">+ ADD CUSTOM MODE</button>
+
+                    <button id="startBtn" onclick="startSim()" style="width: 100%; padding: 16px; margin-top: 20px;">START SESSION →</button>
+                </div>
+
+                <div class="chat-main">
+                    <!-- Mobile Session Header -->
+                    <div id="mobile-session-header" style="display:none; padding: 12px; background: #0a0a0a; border-bottom: 1px solid var(--border); align-items: center; justify-content: space-between;">
+                        <span style="font-size: 9px; color: var(--accent); letter-spacing: 1px; font-weight: 700;">// SESSION_IN_PROGRESS</span>
+                        <button onclick="exitSimulation()" style="padding: 6px 12px; font-size: 9px; border: 1px solid var(--accent); background: transparent; color: var(--accent); width: auto;">EXIT SESSION</button>
+                    </div>
+
+                    <div class="messages" id="message-container">
+                        <div class="msg-system">Select a scenario and start the session to practice.</div>
+                    </div>
+
+                    <div class="input-area">
+                        <input type="text" id="userInput" placeholder="Type your response to the client..." onkeypress="if(event.key==='Enter') sendTurn()">
+                        <button id="sendBtn" onclick="sendTurn()" disabled>SEND</button>
+                    </div>
+
+                    <!-- Feedback Overlay -->
+                    <div class="feedback-overlay" id="feedbackOverlay">
+                        <div class="feedback-card">
+                            <div class="score" id="res-score">?</div>
+                            <div class="score-label">PERFORMANCE SCORE</div>
+                            <div class="critique" id="res-critique"></div>
+                            <ul class="tips-list" id="res-tips"></ul>
+                            <button onclick="window.location.reload()" style="padding: 15px 40px;">TRY AGAIN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Scenario Modal -->
+    <!-- Custom Scenario Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card">
+            <h3 id="modalTitle">Create Custom Scenario</h3>
+            <label>SCENARIO NAME</label>
+            <input type="text" id="cust-name" placeholder="e.g. The Over-Explaining Client">
+            
+            <label>CLIENT PERSONALITY & BEHAVIOR</label>
+            <textarea id="cust-desc" placeholder="Explain how the client should act, their triggers, and their goals."></textarea>
+            
+            <div style="display: flex; gap: 15px;">
+                <button onclick="closeModal()" style="flex: 1; background: transparent; border: 1px solid var(--border); color: #fff;">CANCEL</button>
+                <button onclick="createCustomScenario()" style="flex: 1;">SAVE & START</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmOverlay">
+        <div class="modal-card" style="max-width: 400px; text-align: center;">
+            <h3 style="color: var(--accent); margin-bottom: 10px; font-family: 'Space Grotesk', sans-serif;">PURGE_CONFIRMATION</h3>
+            <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 30px; letter-spacing: 0.5px; line-height: 1.6;">Are you sure you want to permanently delete this custom scenario from the system? This action cannot be undone.</p>
+            
+            <div style="display: flex; gap: 15px;">
+                <button onclick="closeConfirm()" style="flex: 1; background: transparent; border: 1px solid var(--border); color: #fff;">ABORT</button>
+                <button id="confirmBtn" style="flex: 1; background: var(--accent); color: #000;">CONFIRM_PURGE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScenario = 'scope-creep';
+        let customScenarios = {}; // local cache of custom scenarios
+
+        async function initSimulation() {
+            try {
+                // Cache-buster to ensure we get fresh data from the server
+                const res = await fetch('/api/me?t=' + Date.now());
+                const data = await res.json();
+                const profile = data.profile;
+                
+                if (profile && profile.customScenarios) {
+                    // Clear any existing custom cards to prevent duplicates on re-init
+                    document.querySelectorAll('.scenario-card').forEach(card => {
+                        if (card.id && card.id.startsWith('card-custom-')) card.remove();
+                    });
+
+                    Object.keys(profile.customScenarios).forEach(id => {
+                        const scenario = profile.customScenarios[id];
+                        addScenarioToUI(id, scenario.name, scenario.desc);
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to load custom scenarios", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initSimulation);
+
+        function closeConfirm() {
+            document.getElementById('confirmOverlay').style.display = 'none';
+        }
+
+        async function finalizeDelete(id) {
+            // Close modal instantly for zero-latency feel
+            closeConfirm();
+            
+            // Optimistically remove card from UI
+            const card = document.getElementById('card-' + id);
+            if (card) card.remove();
+
+            try {
+                const res = await fetch('/api/sim/custom-delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                
+                const result = await res.json();
+                if (result.error) throw new Error(result.error);
+
+                delete customScenarios[id];
+                
+                if (currentScenario === id) {
+                    selectScenario('scope-creep', document.querySelector('.scenario-card'));
+                }
+            } catch (e) {
+                alert("SYSTEM_ERROR: " + e.message + ". Please refresh.");
+                console.error(e);
+            }
+        }
+
+        function openModal() {
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        async function createCustomScenario() {
+            const name = document.getElementById('cust-name').value.trim();
+            const desc = document.getElementById('cust-desc').value.trim();
+            if(!name || !desc) { alert("Please fill in both name and description."); return; }
+
+            const id = 'custom-' + Date.now();
+            
+            // Save to server
+            await fetch('/api/sim/custom-save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, name, desc })
+            });
+
+            addScenarioToUI(id, name, desc);
+
+            // Clean up
+            document.getElementById('cust-name').value = '';
+            document.getElementById('cust-desc').value = '';
+            closeModal();
+            selectScenario(id, null);
+        }
+
+        function addScenarioToUI(id, name, desc) {
+            customScenarios[id] = { name, desc };
+            const container = document.getElementById('scenario-list');
+            const div = document.createElement('div');
+            div.className = 'scenario-card';
+            div.id = 'card-' + id;
+            div.onclick = function() { selectScenario(id, div); };
+            
+            let deleteBtn = id.startsWith('custom-') ? 
+                `<button onclick="deleteScenario('${id}', event)" class="delete-btn">&times;</button>` : '';
+
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="scenario-title" style="margin-bottom: 0; line-height: 1;">${name}</div>
+                    ${deleteBtn}
+                </div>
+                <div class="scenario-desc">${(desc || "").substring(0, 50)}${(desc || "").length > 50 ? '...' : ''}</div>
+            `;
+            container.appendChild(div);
+            return div;
+        }
+
+        function deleteScenario(id, event) {
+            event.stopPropagation();
+            document.getElementById('confirmOverlay').style.display = 'flex';
+            document.getElementById('confirmBtn').onclick = () => finalizeDelete(id);
+        }
+
+        function selectScenario(id, el) {
+            currentScenario = id;
+            document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        // --- Mobile View Toggling ---
+        function toggleSimView(view) {
+            const sidebar = document.getElementById('sim-sidebar');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (view === 'config') {
+                sidebar.classList.add('active');
+                if (isMobile) {
+                    document.querySelector('.header-section').style.display = 'flex';
+                    document.querySelector('.breadcrumb').style.display = 'flex';
+                }
+            } else {
+                sidebar.classList.remove('active');
+                if (isMobile) {
+                    document.querySelector('.header-section').style.display = 'none';
+                    document.querySelector('.breadcrumb').style.display = 'none';
+                }
+            }
+        }
+
+        function exitSimulation() {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                document.getElementById('mobile-session-header').style.display = 'none';
+                toggleSimView('config');
+            }
+            // Reset chat
+            location.reload(); 
+        }
+
+        async function startSim() {
+            document.getElementById('startBtn').disabled = true;
+            
+            let payload = { scenario: currentScenario };
+            if (currentScenario.startsWith('custom-')) {
+                payload.customDescription = customScenarios[currentScenario].desc;
+            }
+
+            // On mobile, auto-switch to full screen chat
+            if (window.innerWidth <= 768) {
+                document.getElementById('mobile-session-header').style.display = 'flex';
+                toggleSimView('exec');
+            }
+
+            const res = await fetch('/api/sim/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const container = document.getElementById('message-container');
+            container.innerHTML = '<div class="msg-system">Simulation initialized. The client is typing...</div>';
+            
+            showTypingIndicator();
+            const turnRes = await fetch('/api/sim/turn', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: "(Handshake: User joins the chat)" })
+            });
+            const data = await turnRes.json();
+            hideTypingIndicator();
+            
+            addMessage('client', data.client_message);
+            document.getElementById('sendBtn').disabled = false;
+        }
+
+        async function sendTurn() {
+            const input = document.getElementById('userInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            input.value = '';
+            addMessage('user', msg);
+            document.getElementById('sendBtn').disabled = true;
+
+            showTypingIndicator();
+
+            try {
+                const res = await fetch('/api/sim/turn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await res.json();
+                hideTypingIndicator();
+                
+                addMessage('client', data.client_message);
+                
+                if (data.is_session_end) {
+                    showFeedback(data.feedback);
+                } else {
+                    document.getElementById('sendBtn').disabled = false;
+                }
+            } catch (e) {
+                hideTypingIndicator();
+                console.error(e);
+            }
+        }
+
+        function addMessage(who, text) {
+            if (!text) return;
+            const container = document.getElementById('message-container');
+            const div = document.createElement('div');
+            div.className = 'msg msg-' + who;
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('message-container');
+            const indicator = document.createElement('div');
+            indicator.className = 'typing-indicator';
+            indicator.id = 'typing-dots';
+            indicator.innerHTML = '<span></span><span></span><span></span>';
+            container.appendChild(indicator);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const el = document.getElementById('typing-dots');
+            if (el) el.remove();
+        }
+
+        function showFeedback(f) {
+            document.getElementById('res-score').textContent = f.score + '/10';
+            document.getElementById('res-critique').textContent = f.critique;
+            
+            const list = document.getElementById('res-tips');
+            list.innerHTML = '';
+            f.tips.forEach(t => {
+                const li = document.createElement('li');
+                li.textContent = t;
+                list.appendChild(li);
+            });
+            
+            document.getElementById('feedbackOverlay').style.display = 'flex';
+        }
+    </script>
+    <script src="js/command-palette.js"></script>
+    <script src="js/os-ui.js"></script>
+</body>
+</html>

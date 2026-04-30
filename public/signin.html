@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Aevura OS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 440px;
+        }
+        .logo { color: #ff3e00; font-size: 12px; letter-spacing: 3px; margin-bottom: 8px; }
+        h1 { font-size: 24px; margin-bottom: 4px; }
+        .subtitle { color: #777; font-size: 13px; margin-bottom: 32px; }
+        .field { margin-bottom: 18px; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px; }
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        input:focus { outline: none; border-color: #ff3e00; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #ff3e00;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+        .btn:hover { background: #e03500; }
+        .btn:disabled { background: #555; cursor: not-allowed; }
+        .error {
+            background: #2a1010;
+            border: 1px solid #ff3e00;
+            color: #ff7a5a;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+        }
+        .success {
+            background: #102a10;
+            border: 1px solid #3e8f3e;
+            color: #7aff7a;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+        }
+        .link-row { text-align: center; margin-top: 24px; font-size: 13px; color: #777; }
+        .link-row a { color: #ff3e00; text-decoration: none; }
+        .link-row a:hover { text-decoration: underline; }
+        .divider { border: none; border-top: 1px solid #222; margin: 28px 0; }
+        .password-container { position: relative; }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .toggle-password:hover { color: #ff3e00; }
+
+    </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+    <div class="card">
+        <div class="logo">// AEVURA <span style="font-size: 0.85em;">OS</span></div>
+        <h1>Sign In</h1>
+        <p class="subtitle">Access your profile and all ecosystem tools.</p>
+        <hr class="divider">
+
+        <div class="field">
+            <label for="email">EMAIL</label>
+            <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+            <label for="password">PASSWORD</label>
+            <div class="password-container">
+                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+                <button type="button" class="toggle-password" id="togglePassword">Show</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: -8px; margin-bottom: 24px;">
+            <div class="link-row" style="margin-top: 0; font-size: 11px;">
+                <a href="forgot-password.html">Forgot Password?</a>
+            </div>
+        </div>
+
+        <button class="btn" id="signinBtn" onclick="handleSignin()" style="margin-top: 0;">SIGN IN →</button>
+
+        <div class="error" id="errorBox"></div>
+        <div class="success" id="successBox"></div>
+
+        <div class="link-row">
+            Don't have an account? <a href="signup.html">Create one here</a>
+        </div>
+    </div>
+
+    <script>
+        // If already logged in, redirect straight to landing
+        fetch('/api/me').then(r => r.json()).then(data => {
+            if (data.profile) {
+                window.location.href = '/landing.html';
+            }
+        }).catch(() => {});
+
+        async function handleSignin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('signinBtn');
+            const errorBox = document.getElementById('errorBox');
+            const successBox = document.getElementById('successBox');
+
+            errorBox.style.display = 'none';
+            successBox.style.display = 'none';
+
+            if (!email || !password) {
+                errorBox.textContent = 'Please enter your email and password.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            try {
+                const res = await fetch('/api/signin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    errorBox.textContent = data.error;
+                    errorBox.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'SIGN IN →';
+                    return;
+                }
+
+                successBox.textContent = `Welcome back, ${data.profile.name}! Redirecting...`;
+                successBox.style.display = 'block';
+                setTimeout(() => { window.location.href = '/landing.html'; }, 1200);
+
+            } catch (e) {
+                errorBox.textContent = 'Could not connect to server. Is it running?';
+                errorBox.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'SIGN IN →';
+            }
+        }
+
+        // Password visibility toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleSignin();
+        });
+    </script>
+</body>
+</html>

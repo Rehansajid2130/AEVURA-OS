@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aevura OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap"
+        rel="stylesheet">
+    <!-- Utilizing the exactly copied template CSS files -->
+    <link rel="stylesheet" href="css/templatemo-axis-industrial.css">
+    <link rel="stylesheet" href="css/templatemo-axis-main-page.css">
+    <link rel="stylesheet" href="css/command-palette.css">
+    <style>
+        /* === DARK MODE OVERRIDES (From UI Docs) === */
+        [data-theme="dark"] {
+            --base: #0A0A08;
+            --ink: #F5F5F0;
+            --surface: #141412;
+            --muted: #666666;
+            --border: 1px solid rgba(245, 245, 240, 0.15);
+            --border-thin: 1px solid rgba(245, 245, 240, 0.08);
+            --shadow: 8px 8px 0px rgba(245, 245, 240, 0.12);
+            /* Stack card dark backgrounds (overrides hardcoded hex fallbacks) */
+            --stack-card-2-bg: #1C1C1A;
+            --stack-card-4-bg: #181816;
+            --stack-card-5-bg: #1A1A18;
+            --stack-card-6-bg: #161614;
+        }
+
+        [data-theme="dark"] .stat-card {
+            background: #1A1A18;
+            box-shadow: var(--shadow);
+        }
+
+        [data-theme="dark"] .stat-card--dark {
+            background: #F5F5F0;
+            color: #0A0A08;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(2) {
+            background: #1C1C1A;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(3) {
+            background: #141412 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(4) {
+            background: #181816;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(5) {
+            background: #1A1A18;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(6) {
+            background: #161614;
+        }
+
+        [data-theme="dark"] .about {
+            background: #111110;
+        }
+
+        /* --- Animations for OS Dashboard --- */
+        @keyframes pulse-bar {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .bar-chart__col { animation: pulse-bar 2s infinite ease-in-out; }
+        .bar-chart__col:nth-child(2) { animation-delay: 0.2s; }
+        .bar-chart__col:nth-child(3) { animation-delay: 0.4s; }
+        .bar-chart__col:nth-child(4) { animation-delay: 0.6s; }
+        .bar-chart__col:nth-child(5) { animation-delay: 0.8s; }
+        .bar-chart__col:nth-child(6) { animation-delay: 1.0s; }
+
+        .bento-card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(255, 62, 0, 0.03), transparent);
+            pointer-events: none;
+            animation: scanline 4s linear infinite;
+        }
+
+        /* Custom Component Adaptations */
+        .profile-display {
+            background: var(--surface);
+            border-top: var(--border-thin);
+            border-bottom: var(--border-thin);
+            padding: 5rem 0;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .profile-card {
+            background: var(--base);
+            border: var(--border);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--safety, #FF3E00);
+            opacity: 0.5;
+        }
+
+        .profile-card__label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--safety, #FF3E00);
+            margin-bottom: 1.5rem;
+            display: block;
+            font-weight: 700;
+        }
+
+        .profile-card__value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .profile-card__subtext {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Module Number Visibility */
+        .bento-card__number {
+            color: var(--safety, #FF3E00);
+            opacity: 0.9;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+
+        /* Specific Card Colors requested by User */
+        [data-theme="dark"] .bento-card:nth-child(1) {
+            background-color: #1e1e14 !important;
+            border-color: #2a2a1a !important;
+        }
+
+        [data-theme="dark"] .bento-card:nth-child(2) {
+            background-color: #000000 !important;
+            border-color: #1a1a1a !important;
+        }
+
+        [data-theme="dark"] .bento-card:nth-child(2) * {
+            color: var(--ink) !important;
+        }
+
+        [data-theme="dark"] .bento-card:nth-child(2) .bento-card__text {
+            color: var(--muted) !important;
+        }
+
+        /* Ecosystem Card Special Theming */
+        .stack__card {
+            background: var(--base);
+            border: var(--border);
+        }
+
+        .stack__card-title,
+        .stack__card-text {
+            color: var(--ink);
+        }
+
+        .stack__card-step {
+            color: var(--safety, #FF3E00);
+            border-color: var(--safety, #FF3E00);
+            opacity: 0.6;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(1) {
+            background-color: #141414 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(2) {
+            background-color: #111618 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(3) {
+            background-color: #161411 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(4) {
+            background-color: #111814 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(5) {
+            background-color: #181214 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(6) {
+            background-color: #141418 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(7) {
+            background-color: #181611 !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(8) {
+            background-color: #101416 !important;
+        }
+
+        /* ===  DARK MODE HOVER FIX  ===
+   Problem: hover rules use box-shadow color var(--ink) which = white in dark mode.
+   Fix: keep the SAME shadow color as the resting state, just extend the offset. */
+        [data-theme="dark"] .stack__card:hover {
+            box-shadow: 12px 12px 0px rgba(245, 245, 240, 0.12) !important;
+        }
+
+        [data-theme="dark"] .stack__card:nth-child(3):hover {
+            box-shadow: 12px 12px 0px var(--safety) !important;
+        }
+
+        [data-theme="dark"] .bento-card:hover {
+            box-shadow: 12px 12px 0px rgba(245, 245, 240, 0.12) !important;
+        }
+
+        [data-theme="dark"] .bento-card--dark:hover {
+            box-shadow: 12px 12px 0px var(--safety) !important;
+        }
+
+        [data-theme="dark"] .bento-card--safety:hover {
+            box-shadow: 12px 12px 0px rgba(245, 245, 240, 0.12) !important;
+        }
+
+        [data-theme="dark"] .btn--primary:hover {
+            box-shadow: 12px 12px 0px rgba(245, 245, 240, 0.12) !important;
+        }
+
+        [data-theme="dark"] .btn--primary:active {
+            box-shadow: 0 0 0 rgba(245, 245, 240, 0.12) !important;
+        }
+
+        [data-theme="dark"] .btn--ghost:hover {
+            background: var(--safety) !important;
+            color: var(--base) !important;
+            box-shadow: 12px 12px 0px rgba(245, 245, 240, 0.12) !important;
+        }
+
+        [data-theme="dark"] .profile-card:hover {
+            box-shadow: 12px 12px 0px rgba(245, 245, 240, 0.12);
+        }
+
+        /* Fix Footer text visibility in dark mode */
+        [data-theme="dark"] .footer {
+            color: var(--ink);
+        }
+
+        [data-theme="dark"] .footer * {
+            color: inherit;
+        }
+
+        [data-theme="dark"] .footer .footer__brand-desc,
+        [data-theme="dark"] .footer a {
+            color: var(--muted);
+        }
+
+        .skill-pill {
+            padding: 6px 12px;
+            background: rgba(128, 128, 128, 0.1);
+            border: var(--border-thin);
+            font-size: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Target Skill Boxes */
+        .target-box {
+            padding: 12px 20px;
+            border: 1px solid var(--safety, #FF3E00);
+            background: rgba(255, 62, 0, 0.05);
+            display: flex;
+            align-items: center;
+            position: relative;
+            min-width: 140px;
+        }
+
+        .target-box::after {
+            content: "TGT";
+            position: absolute;
+            top: -6px;
+            right: 10px;
+            font-size: 7px;
+            background: var(--safety, #FF3E00);
+            color: var(--base);
+            padding: 1px 4px;
+            font-weight: 700;
+        }
+
+        .target-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        * {
+            scrollbar-width: thin;
+        }
+
+        /* Footer Bottom Elements */
+        .footer__bottom {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-thin);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .btn-back-top {
+            background: var(--base);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back-top:hover {
+            border-color: var(--safety, #FF3E00);
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0px var(--ink);
+        }
+
+        [data-theme="dark"] .btn-back-top:hover {
+            box-shadow: 4px 4px 0px var(--safety, #FF3E00);
+        }
+        @media (max-width: 991px) {
+            .mission-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+
+<body>
+
+    <!-- OS Header Pre-rendered for instant load -->
+    <header class="os-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <a href="landing.html" class="os-logo">
+                    <span class="logo-mark">>_</span>
+                    <span class="logo-text">AEVURA <span class="logo-os">OS</span></span>
+                </a>
+                <span class="sep hide-mobile"></span>
+                <span class="version hide-mobile">v1.0.5</span>
+            </div>
+            
+            <nav class="header-nav hide-mobile">
+                <a href="landing.html" class="active">Dashboard</a>
+                <a href="modules.html">Modules</a>
+                <a href="about-me.html">About Me</a>
+                <a href="contact-us.html">Contact Us</a>
+            </nav>
+
+            <div class="header-right">
+                <div class="status-indicator hide-mobile">
+                    <span class="dot"></span>
+                    SYSTEM NOMINAL
+                </div>
+                <div class="user-info">
+                    <span class="user-name hide-mobile">AUTHENTICATING...</span>
+                    <button onclick="osSignout()" class="btn-signout">TERMINATE</button>
+                </div>
+                <button class="header-cmd-btn show-mobile" onclick="togglePalette()" title="System Commands">
+                    <span>>_</span>
+                </button>
+                <button class="menu-toggle show-mobile" onclick="toggleMobileMenu()">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- COMPONENT: HERO SECTION -->
+    <section class="hero">
+        <div class="hero__grid hero__grid--dense" aria-hidden="true"></div>
+        <div class="hero__label">Precision Goal Engineering</div>
+        <h1 class="hero__title">
+            <span class="line">Map Your</span>
+            <span class="line line--indent">Success<span class="accent-dot">.</span></span>
+        </h1>
+        <div class="hero__bottom">
+            <p class="hero__desc">Turn your massive, undefined goals into structurally sound, machine-generated
+                micro-tasks. Brutally efficient. Zero failure tolerance.</p>
+            <div class="hero__stats">
+                <div>
+                    <div class="hero__stat-num">50<span class="accent">x</span></div>
+                    <div class="hero__stat-label">Faster Planning</div>
+                </div>
+                <div>
+                    <div class="hero__stat-num">100<span class="accent">%</span></div>
+                    <div class="hero__stat-label">Actionable</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPONENT: STATUS TICKER -->
+    <div class="ticker" aria-hidden="true">
+        <div class="ticker__track">
+            <span class="ticker__item">Analyzing Goals</span>
+            <span class="ticker__item">Generating Roadmaps</span>
+            <span class="ticker__item">Parsing Micro-Tasks</span>
+            <span class="ticker__item">Defeating Procrastination</span>
+            <span class="ticker__item">System Online</span>
+            <!-- Duplicated for Infinite Loop -->
+            <span class="ticker__item">Analyzing Goals</span>
+            <span class="ticker__item">Generating Roadmaps</span>
+            <span class="ticker__item">Parsing Micro-Tasks</span>
+            <span class="ticker__item">Defeating Procrastination</span>
+            <span class="ticker__item">System Online</span>
+        </div>
+    </div>
+
+    <!-- COMPONENT: SYSTEM PROFILE INTEGRITY -->
+    <section class="profile-display">
+        <div class="container">
+            <div class="section__header" style="margin-bottom: 3rem;">
+                <div class="section__eyebrow">// System Profile Integrity</div>
+                <h2 class="section__title">User Data<br>Snapshot</h2>
+            </div>
+
+            <div class="profile-grid" id="profileGrid">
+                <!-- Loading State -->
+                <div
+                    style="color: var(--os-text-dim); font-size: 12px; letter-spacing: 2px; padding: 20px; border: 1px dashed var(--os-border);">
+                    FETCHING_USER_METADATA...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPONENT: BENTO GRID DASHBOARD -->
+    <section class="section section--surface" id="modules">
+        <div class="container">
+            <div class="section__header">
+                <div class="section__eyebrow">// Our AI Engine Architecture</div>
+                <h2 class="section__title">The Operating<br>System</h2>
+            </div>
+            <div class="bento__grid">
+
+                <!-- Bento Card: Module 1/2 Profile -->
+                <div class="bento-card bento-card--wide">
+                    <div class="bento-card__number">MOD—01 & 02</div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3 class="bento-card__title">Deep Profiling<br>Engine</h3>
+                            <p class="bento-card__text">We mathematically structure your existing skills, available time,
+                                and learning limits before we write a single task.</p>
+                        </div>
+                        <div style="font-family: 'JetBrains Mono'; font-size: 10px; color: var(--os-accent); border: 1px solid var(--os-accent); padding: 2px 6px; text-transform: uppercase;">
+                            Status: Optimized
+                        </div>
+                    </div>
+                    <div class="bar-chart" style="margin-top: 2rem;">
+                        <div class="bar-chart__col" style="height:45%; background: var(--os-accent); opacity: 0.4;"></div>
+                        <div class="bar-chart__col" style="height:70%; background: var(--os-accent); opacity: 0.6;"></div>
+                        <div class="bar-chart__col" style="height:100%; background: var(--os-accent);"></div>
+                        <div class="bar-chart__col" style="height:50%; background: var(--os-accent); opacity: 0.5;"></div>
+                        <div class="bar-chart__col" style="height:85%; background: var(--os-accent); opacity: 0.8;"></div>
+                        <div class="bar-chart__col" style="height:30%; background: var(--os-accent); opacity: 0.3;"></div>
+                    </div>
+                </div>
+
+                <!-- Bento Card: Module 3 Analysis -->
+                <div class="bento-card bento-card--narrow bento-card--dark">
+                    <div class="bento-card__number">MOD—03</div>
+                    <h3 class="bento-card__title">Life Coach<br>Analysis</h3>
+                    <div style="margin-top: 1rem; padding: 10px; background: rgba(0,0,0,0.2); border-left: 2px solid var(--os-accent); font-family: 'JetBrains Mono'; font-size: 11px; line-height: 1.4;">
+                        "Your current pace is mathematically insufficient for your Q3 goals."
+                    </div>
+                    <p class="bento-card__text" style="margin-top: 1rem; opacity: 0.8">Brutal honesty mixed with
+                        strategic motivation.</p>
+                </div>
+
+                <!-- Bento Card: Module 4 Roadmap -->
+                <div class="bento-card bento-card--mid">
+                    <div class="bento-card__number">MOD—04</div>
+                    <div>
+                        <h3 class="bento-card__title">Adaptive<br>Level Matrix</h3>
+                        <p class="bento-card__text">Traditional tasks are boring. Your goal is parsed into a 3-tier
+                            leveled progression system.</p>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <div class="bar-track" style="height: 6px; background: rgba(255,255,255,0.05);">
+                            <div class="bar-track__fill" style="width: 65%; background: var(--os-accent);"></div>
+                        </div>
+                        <div style="display:flex; justify-content: space-between; font-size: 9px; margin-top: 8px; font-family: 'JetBrains Mono'; opacity: 0.5;">
+                            <span>LVL 01</span>
+                            <span>LVL 02</span>
+                            <span>LVL 03</span>
+                        </div>
+                    </div>
+                    <div style="align-self:end;display:flex;flex-wrap:wrap;gap:0.5rem; margin-top: 1rem;">
+                        <span class="tag" style="font-size: 9px; padding: 2px 6px;">Setup</span>
+                        <span class="tag" style="font-size: 9px; padding: 2px 6px; border-color: var(--os-accent); color: var(--os-accent);">Active</span>
+                        <span class="tag tag--ghost" style="font-size: 9px; padding: 2px 6px;">Mastery</span>
+                    </div>
+                </div>
+
+                <!-- Bento Card: Module 5 Tasks -->
+                <div class="bento-card bento-card--mid bento-card--safety">
+                    <div class="bento-card__number" style="opacity:0.6">MOD—05</div>
+                    <h3 class="bento-card__title">Iterative<br>Micro-Tasks</h3>
+                    <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; opacity: 0.9;">
+                            <div style="width: 12px; height: 12px; border: 1px solid #000; background: #000; display: flex; align-items: center; justify-content: center; font-size: 8px;">✓</div>
+                            <span>Initialize Environment</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; opacity: 0.9;">
+                            <div style="width: 12px; height: 12px; border: 1px solid #000;"></div>
+                            <span>Deploy Core Architecture</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; opacity: 0.5;">
+                            <div style="width: 12px; height: 12px; border: 1px solid #000;"></div>
+                            <span>Execute Stress Test</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 10px; margin-top: auto;">
+                        <div class="bento-card__stat" style="font-size: 3rem;">5-7</div>
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8;">Actionable Steps</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPONENT: ECOSYSTEM MODULES -->
+    <section class="section" id="ecosystem">
+        <div class="container">
+            <div class="stack__header">
+                <div>
+                    <div class="section__eyebrow">// Expansion Modules</div>
+                    <h2 class="section__title">The Ecosystem</h2>
+                </div>
+                <p class="stack__subtitle">Aevura OS expands far beyond goal planning. Explore our specialized
+                    sub-engines.</p>
+            </div>
+            <div class="ecosystem-cards">
+                <!-- Core Engine Laboratory -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">00</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Core Engine<br>Laboratory</h3>
+                        <p class="stack__card-text">Access the raw structural logic of the Aevura OS. Systematically evaluate and generate deep behavioral profiles, construct multi-tier adaptive roadmaps, and break down complex overarching goals into highly actionable task clusters utilizing the central Gemini intelligence engine for flawless execution.</p>
+                    </div>
+                </article>
+
+                <!-- Freelancer Assistant -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">01</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Freelancer<br>Assistant</h3>
+                        <p class="stack__card-text">Take control of your independent career. Automate persuasive, high-converting client proposals, mathematically structure your freelance business pricing models for maximum profit, and continuously optimize workflow management utilizing brutal, uncompromising data points tailored to your niche.</p>
+                    </div>
+                </article>
+
+                <!-- Real-World Simulation Mode -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">02</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Real-World<br>Simulation</h3>
+                        <p class="stack__card-text">Stress-test your technical and communication abilities in highly realistic, AI-modeled scenarios. Accurately mirror high-pressure technical interviews, navigate demanding client interactions, and manage tight project deadlines to forge resilience before facing the actual market.</p>
+                    </div>
+                </article>
+
+                <!-- Case Study Architect -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">03</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Case Study<br>Architect</h3>
+                        <p class="stack__card-text">Transform unstructured work into premium portfolio assets. Feed the system your scattered code snippets, raw project notes, and repository links. The engine will synthesize and architect high-impact, professional-grade case studies designed to aggressively sell your results and secure top-tier opportunities.</p>
+                    </div>
+                </article>
+
+                <!-- Skill Gap Analyzer -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">04</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Skill Gap<br>Analyzer</h3>
+                        <p class="stack__card-text">Align your capabilities with real-world demand. Deep-scan current, live market job descriptions against your exact technical profile. Instantly identify missing variables in your knowledge base, prioritize critical learning paths, and surgically eliminate professional weaknesses before they cost you the job.</p>
+                    </div>
+                </article>
+
+                <!-- Contract Shield -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">05</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Contract<br>Shield</h3>
+                        <p class="stack__card-text">Secure your business engagements with uncompromising legal precision. Architect iron-clad freelance agreements and statements of work that comprehensively protect your intellectual property, rigorously define strict project scope limits, and automatically enforce compounding late payment penalties to ensure you are compensated on time, every time.</p>
+                    </div>
+                </article>
+
+                <!-- Decision Engine -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">07</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Decision<br>Engine</h3>
+                        <p class="stack__card-text">Eliminate choice paralysis through mathematically weighted analysis. Input your career crossroads, and the engine will instantly evaluate branching paths, weigh strategic outcomes against your specific profile, and deliver brutally objective, actionable recommendations to maximize your professional trajectory.</p>
+                    </div>
+                </article>
+
+                <!-- Progress Tracker -->
+                <article class="stack__card">
+                    <div class="stack__card-left">
+                        <div class="stack__card-step">08</div>
+                    </div>
+                    <div class="stack__card-right">
+                        <h3 class="stack__card-title">Progress<br>Tracker</h3>
+                        <p class="stack__card-text">Maintain absolute visibility over your execution. Monitor your comprehensive journey through the adaptive roadmap, meticulously track the completion of micro-tasks, visualize cumulative growth metrics, and receive continuous strategic AI insights to aggressively optimize your ongoing performance.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="background-color: var(--surface); border-top: 1px solid var(--border);">
+        <div class="footer__inner">
+            <div class="footer__top">
+                <div class="footer__brand">
+                    <h2 class="font-display footer__brand-name">AEVURA<br><span style="color: var(--safety, #FF3E00); font-size: 0.85em;">OS</span><span class="accent">.</span></h2>
+                    <p class="footer__brand-desc">Engineered for human execution. Stop planning. Start executing.</p>
+                </div>
+                <div class="footer__col">
+                    <div class="footer__col-title">Modules</div>
+                    <a href="index.html">Core Engine Lab</a>
+                    <a href="freelancer-assistant.html">Freelancer Assistant</a>
+                    <a href="simulation.html">Real-World Simulation</a>
+                    <a href="case-study-architect.html">Case Study Architect</a>
+                    <a href="skill-gap-analyzer.html">Skill Gap Analyzer</a>
+                    <a href="contract-generator.html">Contract Shield</a>
+                    <a href="decision-engine.html">Decision Engine</a>
+                    <a href="progress.html">Progress Tracker</a>
+                </div>
+                <div class="footer__col">
+                    <div class="footer__col-title">System Links</div>
+                    <a href="landing.html">Dashboard</a>
+                    <a href="about-me.html">About Me</a>
+                    <a href="contact-us.html">Contact Us</a>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <div class="footer__copy" style="color: var(--safety, #FF3E00);">
+                    &copy; 2026 AEVURA OS. ALL RIGHTS RESERVED. // END OF LINE.
+                </div>
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="btn-back-top">
+                    Back to Top <span style="color: var(--safety, #FF3E00);">↑</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        async function populateProfile() {
+            // Wait briefly for os-ui.js to handle initial auth
+            if (!window.currentUser) {
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            try {
+                let profile = window.currentUser;
+
+                if (!profile) {
+                    const response = await fetch('/api/me');
+                    const data = await response.json();
+                    if (data.error || !data.profile) return;
+                    profile = data.profile;
+                }
+
+                const grid = document.getElementById('profileGrid');
+
+                const targetSkills = profile.target_skill.split(',').map(s => s.trim()).filter(Boolean);
+
+                let html = `
+            <div class="profile-card">
+                <span class="profile-card__label">USER_IDENTITY</span>
+                <div class="profile-card__value" style="font-size: 1.4rem;">${profile.name}</div>
+                <div class="profile-card__subtext" style="color: var(--ink); margin-bottom: 15px;">${profile.email}</div>
+                <div style="margin-top: auto;">
+                    <div class="profile-card__subtext">NODE_LOCATION: ${profile.location}</div>
+                    <div class="profile-card__subtext">ACCESS_LEVEL: AUTHORIZED</div>
+                </div>
+            </div>
+
+            <div class="profile-card">
+                <span class="profile-card__label">CORE_CAPABILITIES</span>
+                <div class="profile-card__value">${profile.freelance_skills.length} Skills</div>
+                <div class="skill-pills">
+                    ${profile.freelance_skills.map(s => `<span class="skill-pill">${s}</span>`).join('')}
+                </div>
+                <div style="margin-top: auto; padding-top: 20px;">
+                    <div class="profile-card__subtext">MASTERY: ${profile.current_level.toUpperCase()}</div>
+                </div>
+            </div>
+
+            <div class="profile-card">
+                <span class="profile-card__label">TARGET_ACQUISITION</span>
+                <div class="profile-card__subtext">PRIMARY_OBJECTIVES:</div>
+                <div class="target-container">
+                    ${targetSkills.map(s => `
+                        <div class="target-box">
+                            <div class="target-name">${s}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: auto; padding-top: 20px;">
+                    <div class="profile-card__subtext">STRATEGY: ${profile.learning_intent === 'improve' ? 'SYSTEM_OPTIMIZATION' : 'NEW_MODULE_INSTALL'}</div>
+                </div>
+            </div>
+        `;
+                grid.innerHTML = html;
+            } catch (e) {
+                console.error("Profile Fetch Error", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', populateProfile);
+    </script>
+    <script src="js/command-palette.js"></script>
+    <script src="js/os-ui.js"></script>
+</body>
+
+</html>

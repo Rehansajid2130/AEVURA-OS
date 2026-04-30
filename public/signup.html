@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — Aevura OS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 520px;
+        }
+        .logo { color: #ff3e00; font-size: 12px; letter-spacing: 3px; margin-bottom: 8px; }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 36px 40px;
+            margin-top: 12px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 28px;
+        }
+        .progress-step {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: #2a2a2a;
+            transition: background 0.3s;
+        }
+        .progress-step.done { background: #ff3e00; }
+        .progress-step.active { background: #ff7a5a; }
+
+        .step-label {
+            font-size: 11px;
+            color: #555;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        h2 { font-size: 20px; margin-bottom: 4px; }
+        .step-desc { color: #666; font-size: 13px; margin-bottom: 28px; }
+
+        /* Pages */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Form Fields */
+        .field { margin-bottom: 18px; }
+        label { display: block; font-size: 11px; color: #aaa; margin-bottom: 6px; letter-spacing: 1.5px; }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: #111;
+            border: 1px solid #2e2e2e;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus { outline: none; border-color: #ff3e00; }
+
+        /* Radio / Button Choice Groups */
+        .choices { display: flex; flex-direction: column; gap: 8px; }
+        .choice-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #111;
+            border: 1px solid #2e2e2e;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            color: #ccc;
+            transition: border-color 0.2s, background 0.2s;
+            text-align: left;
+        }
+        .choice-btn:hover { border-color: #555; background: #161616; }
+        .choice-btn.selected { border-color: #ff3e00; background: #1f1210; color: #fff; }
+        .choice-btn .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid #555;
+            flex-shrink: 0;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .choice-btn.selected .dot { border-color: #ff3e00; background: #ff3e00; }
+
+        /* Conditional field */
+        .conditional { display: none; }
+        .conditional.visible { display: block; }
+
+        /* Buttons */
+        .btn-row { display: flex; gap: 12px; margin-top: 28px; }
+        .btn {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-back { background: #222; color: #aaa; border: 1px solid #333; }
+        .btn-back:hover { background: #2a2a2a; }
+        .btn-next { background: #ff3e00; color: white; }
+        .btn-next:hover { background: #e03500; }
+        .btn-next:disabled { background: #444; cursor: not-allowed; }
+
+        /* Error/success */
+        .error {
+            background: #2a1010;
+            border: 1px solid #ff3e00;
+            color: #ff7a5a;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 14px;
+            display: none;
+        }
+        .success {
+            background: #102a10;
+            border: 1px solid #3e8f3e;
+            color: #7aff7a;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 14px;
+            display: none;
+        }
+        .link-row { text-align: center; margin-top: 20px; font-size: 13px; color: #555; }
+        .link-row a { color: #ff3e00; text-decoration: none; }
+        .link-row a:hover { text-decoration: underline; }
+        .divider { border: none; border-top: 1px solid #222; margin: 0 0 24px; }
+        .password-container { position: relative; }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .toggle-password:hover { color: #ff3e00; }
+
+    </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+<div class="wrapper">
+    <div class="logo">// AEVURA <span style="font-size: 0.85em;">OS</span></div>
+    <div class="card">
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active" id="pb1"></div>
+            <div class="progress-step" id="pb2"></div>
+            <div class="progress-step" id="pb3"></div>
+        </div>
+
+        <!-- ==================== PAGE 1: WHO ARE YOU ==================== -->
+        <div class="page active" id="page1">
+            <div class="step-label">STEP 1 OF 3</div>
+            <h2>Who are you?</h2>
+            <p class="step-desc">Basic identity. This personalizes your entire experience.</p>
+            <hr class="divider">
+
+            <div class="field">
+                <label for="name">FULL NAME / NICKNAME</label>
+                <input type="text" id="name" placeholder="e.g. Alex">
+            </div>
+            <div class="field">
+                <label for="email">EMAIL ADDRESS</label>
+                <input type="email" id="email" placeholder="you@example.com">
+            </div>
+            <div class="field">
+                <label for="location">WHERE ARE YOU BASED?</label>
+                <input type="text" id="location" placeholder="e.g. Lahore, Pakistan">
+            </div>
+            <div class="field">
+                <label for="password">CREATE A PASSWORD</label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="Min 6 characters">
+                    <button type="button" class="toggle-password" id="togglePassword">Show</button>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-next" onclick="goNext(1)">NEXT: YOUR SKILLS →</button>
+            </div>
+            <div class="error" id="err1"></div>
+        </div>
+
+        <!-- ==================== PAGE 2: YOUR SKILLS ==================== -->
+        <div class="page" id="page2">
+            <div class="step-label">STEP 2 OF 3</div>
+            <h2>Your Skills & Status</h2>
+            <p class="step-desc">Tell us what you can do and what you're already selling.</p>
+            <hr class="divider">
+
+            <div class="field">
+                <label>ARE YOU CURRENTLY FREELANCING?</label>
+                <div class="choices" id="freelanceChoices">
+                    <button class="choice-btn" data-val="yes" onclick="selectChoice('freelanceChoices', 'yes', 'freelanceField')">
+                        <span class="dot"></span> Yes — I have active clients
+                    </button>
+                    <button class="choice-btn" data-val="part-time" onclick="selectChoice('freelanceChoices', 'part-time', 'freelanceField')">
+                        <span class="dot"></span> Part-time / occasionally
+                    </button>
+                    <button class="choice-btn" data-val="no" onclick="selectChoice('freelanceChoices', 'no', 'freelanceField')">
+                        <span class="dot"></span> No — I want to start or I just use other features
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shown only if freelancing -->
+            <div class="field conditional" id="freelanceField">
+                <label for="freelanceSkills">WHAT SKILL(S) ARE YOU CURRENTLY SELLING?</label>
+                <input type="text" id="freelanceSkills" placeholder="e.g. Logo design, React dev, Copywriting (comma separated)">
+            </div>
+
+            <div class="field">
+                <label for="tools">TOOLS & SOFTWARE YOU USE</label>
+                <input type="text" id="tools" placeholder="e.g. Figma, VS Code, Python (comma separated)">
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-back" onclick="goBack(2)">← BACK</button>
+                <button class="btn btn-next" onclick="goNext(2)">NEXT: YOUR GOAL →</button>
+            </div>
+            <div class="error" id="err2"></div>
+        </div>
+
+        <!-- ==================== PAGE 3: YOUR GOAL ==================== -->
+        <div class="page" id="page3">
+            <div class="step-label">STEP 3 OF 3</div>
+            <h2>What's your mission?</h2>
+            <p class="step-desc">This shapes every AI output you receive in the platform.</p>
+            <hr class="divider">
+
+            <div class="field">
+                <label>ARE YOU HERE TO IMPROVE A SKILL OR LEARN A NEW ONE?</label>
+                <div class="choices" id="intentChoices">
+                    <button class="choice-btn" data-val="improve" onclick="selectChoice('intentChoices', 'improve')">
+                        <span class="dot"></span> Improve — I have a skill, I want to level it up
+                    </button>
+                    <button class="choice-btn" data-val="new-skill" onclick="selectChoice('intentChoices', 'new-skill')">
+                        <span class="dot"></span> New skill — Starting from scratch
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="targetSkill">WHICH SKILL ARE YOU FOCUSING ON?</label>
+                <input type="text" id="targetSkill" placeholder="e.g. UI/UX Design, Python, Video Editing">
+            </div>
+
+            <div class="field">
+                <label>WHAT IS YOUR CURRENT LEVEL IN THIS SKILL?</label>
+                <div class="choices" id="levelChoices">
+                    <button class="choice-btn" data-val="Beginner" onclick="selectChoice('levelChoices', 'Beginner')">
+                        <span class="dot"></span> Beginner — Just getting started
+                    </button>
+                    <button class="choice-btn" data-val="Intermediate" onclick="selectChoice('levelChoices', 'Intermediate')">
+                        <span class="dot"></span> Intermediate — I know the basics
+                    </button>
+                    <button class="choice-btn" data-val="Expert" onclick="selectChoice('levelChoices', 'Expert')">
+                        <span class="dot"></span> Expert — I want to master or monetize it
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>YOUR PRIMARY GOAL ON THIS PLATFORM?</label>
+                <div class="choices" id="goalChoices">
+                    <button class="choice-btn" data-val="income" onclick="selectChoice('goalChoices', 'income')">
+                        <span class="dot"></span> Make income — Freelancing, clients, gigs
+                    </button>
+                    <button class="choice-btn" data-val="skill" onclick="selectChoice('goalChoices', 'skill')">
+                        <span class="dot"></span> Learn — Building skills for employment or growth
+                    </button>
+                    <button class="choice-btn" data-val="both" onclick="selectChoice('goalChoices', 'both')">
+                        <span class="dot"></span> Both — Learn AND earn simultaneously
+                    </button>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-back" onclick="goBack(3)">← BACK</button>
+                <button class="btn btn-next" id="submitBtn" onclick="handleSubmit()">CREATE ACCOUNT →</button>
+            </div>
+            <div class="error" id="err3"></div>
+            <div class="success" id="successBox"></div>
+        </div>
+
+    </div>
+    <div class="link-row">
+        Already have an account? <a href="signin.html">Sign in here</a>
+    </div>
+</div>
+
+<script>
+    // Password visibility toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
+
+    // --- State ---
+    const answers = {
+        is_freelancer: null,
+        learning_intent: null,
+        current_level: null,
+        primary_goal: null,
+    };
+
+    // --- Progress bar update ---
+    function setProgress(step) {
+        for (let i = 1; i <= 3; i++) {
+            const el = document.getElementById('pb' + i);
+            el.className = 'progress-step';
+            if (i < step) el.classList.add('done');
+            else if (i === step) el.classList.add('active');
+        }
+    }
+
+    // --- Page navigation ---
+    function goNext(fromPage) {
+        const err = document.getElementById('err' + fromPage);
+        err.style.display = 'none';
+
+        if (fromPage === 1) {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const password = document.getElementById('password').value;
+            if (!name || !email || !location) { showErr(1, 'Please fill in all fields.'); return; }
+            if (!email.includes('@')) { showErr(1, 'Please enter a valid email address.'); return; }
+            if (password.length < 6) { showErr(1, 'Password must be at least 6 characters.'); return; }
+        }
+
+        if (fromPage === 2) {
+            if (!answers.is_freelancer) { showErr(2, 'Please select your freelancing status.'); return; }
+            const tools = document.getElementById('tools').value.trim();
+            if (!tools) { showErr(2, 'Please enter at least one tool you use.'); return; }
+        }
+
+        document.getElementById('page' + fromPage).classList.remove('active');
+        document.getElementById('page' + (fromPage + 1)).classList.add('active');
+        setProgress(fromPage + 1);
+    }
+
+    function goBack(fromPage) {
+        document.getElementById('page' + fromPage).classList.remove('active');
+        document.getElementById('page' + (fromPage - 1)).classList.add('active');
+        setProgress(fromPage - 1);
+    }
+
+    // --- Choice button selection ---
+    function selectChoice(groupId, value, conditionalId) {
+        const group = document.getElementById(groupId);
+        group.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('selected'));
+        const selected = group.querySelector(`[data-val="${value}"]`);
+        if (selected) selected.classList.add('selected');
+
+        // Update answers object
+        if (groupId === 'freelanceChoices') answers.is_freelancer = value;
+        if (groupId === 'intentChoices') answers.learning_intent = value;
+        if (groupId === 'levelChoices') answers.current_level = value;
+        if (groupId === 'goalChoices') answers.primary_goal = value;
+
+        // Show/hide conditional fields
+        if (conditionalId) {
+            const cond = document.getElementById(conditionalId);
+            if (value === 'yes' || value === 'part-time') {
+                cond.classList.add('visible');
+            } else {
+                cond.classList.remove('visible');
+            }
+        }
+    }
+
+    // --- Show error ---
+    function showErr(page, msg) {
+        const el = document.getElementById('err' + page);
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    // --- Submit ---
+    async function handleSubmit() {
+        const err = document.getElementById('err3');
+        const successBox = document.getElementById('successBox');
+        const submitBtn = document.getElementById('submitBtn');
+        err.style.display = 'none';
+        successBox.style.display = 'none';
+
+        // Validate page 3
+        if (!answers.learning_intent) { showErr(3, 'Please select your learning intent.'); return; }
+        const targetSkill = document.getElementById('targetSkill').value.trim();
+        if (!targetSkill) { showErr(3, 'Please enter the skill you are focusing on.'); return; }
+        if (!answers.current_level) { showErr(3, 'Please select your current level.'); return; }
+        if (!answers.primary_goal) { showErr(3, 'Please select your primary goal.'); return; }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+
+        const payload = {
+            answers: {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim().toLowerCase(),
+                location: document.getElementById('location').value.trim(),
+                is_freelancer: answers.is_freelancer,
+                freelance_skills: document.getElementById('freelanceSkills')?.value || '',
+                tools: document.getElementById('tools').value.trim(),
+                learning_intent: answers.learning_intent,
+                target_skill: targetSkill,
+                current_level: answers.current_level,
+                primary_goal: answers.primary_goal,
+            },
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const res = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                showErr(3, data.error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'CREATE ACCOUNT →';
+                return;
+            }
+
+            successBox.textContent = `Account created! Welcome, ${data.profile.name}. Redirecting...`;
+            successBox.style.display = 'block';
+            setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+
+        } catch (e) {
+            showErr(3, 'Could not connect to server. Is it running?');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'CREATE ACCOUNT →';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Core Engine Laboratory — Aevura OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/templatemo-axis-industrial.css">
+<link rel="stylesheet" href="css/command-palette.css">
+<style>
+    :root {
+        --accent: #FF3E00;
+        --bg: #0a0a0a;
+        --surface: #141414;
+        --border: #2a2a2a;
+        --text: #e0e0e0;
+        --text-dim: #999;
+    }
+
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'JetBrains Mono', monospace;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+
+    .app-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .header-section {
+        margin-bottom: 2rem;
+    }
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 3rem;
+        gap: 20px;
+    }
+    .header-section h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -2px;
+        line-height: 1;
+    }
+    .accent-dot { color: var(--accent); }
+
+    .lab-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 968px) {
+        .lab-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+        background: rgba(20, 20, 20, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        padding: 2rem;
+        position: relative;
+        box-shadow: 20px 20px 0px rgba(255, 62, 0, 0.05);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    label {
+        display: block;
+        font-size: 10px;
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    input, textarea {
+        width: 100%;
+        background: #000;
+        border: 1px solid var(--border);
+        color: #fff;
+        padding: 0.8rem;
+        font-family: inherit;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+    input:focus { border-color: var(--accent); outline: none; }
+
+    .btn-action {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 1rem 1.5rem;
+        font-family: inherit;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.2s;
+        font-size: 12px;
+    }
+    .btn-action:hover:not(:disabled) {
+        transform: translate(-4px, -4px);
+        box-shadow: 4px 4px 0px #fff;
+    }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-panel {
+        background: #000;
+        border: 1px solid var(--border);
+        min-height: 600px;
+        padding: 3rem;
+        position: relative;
+        overflow-y: auto;
+        max-height: 85vh;
+    }
+
+    .loading-overlay {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        justify-content: center;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.8);
+        z-index: 10;
+    }
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #111;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Result Styling */
+    .result-section { margin-bottom: 3rem; }
+    .result-section h2 { 
+        font-family: 'Space Grotesk', sans-serif; 
+        font-size: 2rem; 
+        border-bottom: 2px solid var(--accent); 
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .result-section h3 { font-size: 1.2rem; color: var(--accent); margin-top: 2rem; }
+    .roadmap-item {
+        background: #111;
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .roadmap-item::before {
+        content: "";
+        position: absolute;
+        left: -1px; top: 0; bottom: 0;
+        width: 4px;
+        background: var(--accent);
+    }
+
+    .task-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    @media (max-width: 768px) { .task-list { grid-template-columns: 1fr; } }
+    .task-card {
+        background: #141414;
+        border: 1px solid #333;
+        padding: 1rem;
+        font-size: 13px;
+    }
+
+    /* MCQ Styling */
+    .question-box {
+        background: #0a0a0a;
+        border: 1px solid #222;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .option-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 10px;
+        border: 1px solid transparent;
+        transition: 0.2s;
+    }
+    .option-item:hover { background: #111; border-color: #333; }
+    .option-item input { width: auto; margin: 0; }
+
+    .hidden { display: none !important; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 13px;
+        color: var(--text-dim);
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    @media (max-width: 768px) {
+        .breadcrumb {
+            font-size: 8px;
+            gap: 6px;
+        }
+    }
+    .btn-back {
+        margin-left: auto;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        padding: 6px 14px;
+        font-family: inherit;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .btn-back:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="breadcrumb">
+        System / <span>Module 00</span> / <span>Core Engine Laboratory</span>
+    </div>
+
+    <div class="header-section">
+        <h1>Core Engine<br>Laboratory<span class="accent-dot">.</span></h1>
+        <a href="#" onclick="history.back(); return false;" class="btn-back" style="margin-bottom: 5px;">← Back</a>
+    </div>
+
+    <div class="lab-grid">
+        <aside>
+            <div class="panel">
+                <div class="form-group">
+                    <label>Structural Goal Input</label>
+                    <textarea id="goalInput" rows="4" placeholder="e.g. I want to launch a SaaS platform for freelancers using Next.js and AI.">I want to learn Python and get an entry level backend dev job</textarea>
+                </div>
+                <button class="btn-action" id="startBtn" onclick="startProfiling()">Initiate Sequence</button>
+            </div>
+            
+            <div style="margin-top: 2rem; font-size: 11px; color: #444; line-height: 1.4;">
+                // SYSTEM STATUS: ARMED<br>
+                // MODULES 01-05 READY<br>
+                // BYPASSING INTERMEDIATE VISUALS FOR DIRECT ANALYSIS
+            </div>
+        </aside>
+
+        <main class="result-panel" id="mainStage">
+            <div id="placeholder" style="text-align:center; margin-top: 180px; color: #222; font-size: 14px;">
+                // AWAITING SIGNAL...<br>
+                Inject goal into the primary control panel to begin.
+            </div>
+
+            <div class="loading-overlay" id="loading">
+                <div class="spinner"></div>
+                <div id="loadingStatus" style="font-size: 11px; letter-spacing: 3px; text-transform: uppercase;">PROCESSING...</div>
+            </div>
+
+            <!-- DYNAMIC CONTENT AREAS -->
+            <div id="mcqStage" class="hidden">
+                <h2 style="font-family: 'Space Grotesk'; font-size: 2rem; margin-bottom: 2rem;">Adaptive Profiling</h2>
+                <div id="questionsContainer"></div>
+                <button class="btn-action" style="max-width: 300px;" onclick="synthesizeAndAnalyze()">Complete Synthesis & Execute</button>
+            </div>
+
+            <div id="finalStage" class="hidden">
+                <!-- Headings and Lines will be rendered here -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+
+    let currentQuestions = [];
+
+    function showLoading(msg) {
+        document.getElementById('loading').style.display = 'flex';
+        document.getElementById('loadingStatus').textContent = msg;
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    async function startProfiling() {
+        const goal = document.getElementById('goalInput').value;
+        if (!goal.trim()) return alert("Goal cannot be empty.");
+
+        document.getElementById('placeholder').style.display = 'none';
+        document.getElementById('mcqStage').classList.add('hidden');
+        document.getElementById('finalStage').classList.add('hidden');
+        
+        showLoading("INITIALIZING MODULE 01...");
+        
+        try {
+            const res = await fetch('/api/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ goal })
+            });
+            const data = await res.json();
+            hideLoading();
+            
+            if (data.error) throw new Error(data.error);
+            
+            if (data.questions) {
+                currentQuestions = data.questions;
+                const container = document.getElementById('questionsContainer');
+                container.innerHTML = '';
+                data.questions.forEach((q, i) => {
+                    let optionsHtml = q.options.map((opt, j) => `
+                        <label class="option-item">
+                            <input type="radio" name="q_${i}" value="${opt}" onclick="document.getElementById('answer_${i}').disabled = true; document.getElementById('answer_${i}').style.opacity = '0.3';">
+                            <span>${opt}</span>
+                        </label>
+                    `).join('');
+                    
+                    container.innerHTML += `
+                        <div class="question-box">
+                            <label style="color: var(--accent); margin-bottom: 1.5rem; display:block; font-size: 16px; font-weight:700;">${q.question_text}</label>
+                            ${optionsHtml}
+                            <label class="option-item">
+                                <input type="radio" name="q_${i}" value="custom" checked onclick="document.getElementById('answer_${i}').disabled = false; document.getElementById('answer_${i}').style.opacity = '1';">
+                                <span><em>Other / Specific:</em></span>
+                            </label>
+                            <input type="text" id="answer_${i}" placeholder="Type specific details..." style="margin-top:10px; border-color: #222;">
+                        </div>
+                    `;
+                });
+                document.getElementById('mcqStage').classList.remove('hidden');
+                document.getElementById('mainStage').scrollTop = 0;
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+            document.getElementById('placeholder').style.display = 'block';
+        }
+    }
+
+    async function synthesizeAndAnalyze() {
+        const answers = {};
+        currentQuestions.forEach((q, i) => {
+            let selectedOption = document.querySelector(`input[name="q_${i}"]:checked`);
+            if (selectedOption && selectedOption.value !== "custom") {
+                answers[q.question_text] = selectedOption.value;
+            } else {
+                answers[q.question_text] = document.getElementById(`answer_${i}`).value || "No specific answer provided";
+            }
+        });
+
+        document.getElementById('mcqStage').classList.add('hidden');
+        showLoading("SYNTHESIZING & EXECUTING CORE PIPELINE...");
+        
+        try {
+            // 1. Build Profile
+            const profileRes = await fetch('/api/build-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers })
+            });
+            const profile = await profileRes.json();
+            if (profile.error) throw new Error(profile.error);
+
+            // 2. Run Analysis & Roadmap Immediately
+            const analysisRes = await fetch('/api/analyze-and-plan', { method: 'POST' });
+            const data = await analysisRes.json();
+            hideLoading();
+            
+            if (data.error) throw new Error(data.error);
+            
+            renderFinalResult(data);
+        } catch (err) {
+            alert("Pipeline Error: " + err.message);
+            document.getElementById('mcqStage').classList.remove('hidden');
+        }
+    }
+
+    function renderFinalResult(data) {
+        const stage = document.getElementById('finalStage');
+        stage.innerHTML = '';
+
+        const analysis = data.goalAnalysis || {};
+        const roadmapItems = (data.roadmapData && data.roadmapData.roadmap) ? data.roadmapData.roadmap : [];
+        const tasks = (data.taskPlan && data.taskPlan.tasks) ? data.taskPlan.tasks : [];
+
+        // Analysis Section
+        let html = `
+            <div class="result-section">
+                <h2>Strategic Analysis</h2>
+                <div class="panel" style="background: #111; padding: 2rem;">
+                    <p style="font-size: 18px; color: #fff; line-height: 1.8;">${analysis.analysis || "Analysis complete."}</p>
+                    <div style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem;">
+                        <div>
+                            <label>DIFFICULTY</label>
+                            <span style="color: var(--accent); font-size: 18px; font-weight: 700;">${analysis.difficulty || "TBD"}</span>
+                        </div>
+                        <div>
+                            <label>ESTIMATED TIME</label>
+                            <span style="color: #fff; font-size: 18px; font-weight: 700;">${analysis.estimated_time || "TBD"}</span>
+                        </div>
+                        <div>
+                            <label>GOAL TYPE</label>
+                            <span style="color: #fff; font-size: 18px; font-weight: 700;">${analysis.goal_type || "TBD"}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Roadmap Section
+        if (roadmapItems.length > 0) {
+            html += `<div class="result-section"><h2>Execution Roadmap</h2>`;
+            roadmapItems.forEach(m => {
+                html += `
+                    <div class="roadmap-item">
+                        <label>Level ${m.level}</label>
+                        <h3 style="margin: 0.5rem 0;">${m.title}</h3>
+                        <p style="font-size: 14px; color: #aaa;">${m.description}</p>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Task Section
+        if (tasks.length > 0) {
+            html += `
+                <div class="result-section">
+                    <h2>High-Velocity Tasks</h2>
+                    <div class="task-list">
+            `;
+            tasks.forEach(t => {
+                html += `
+                    <div class="task-card">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                            <span style="color: var(--accent); font-weight: 700;">STEP ${t.order || '?'}</span>
+                            <span style="font-size: 10px; color: #555;">PRIORITY: ${t.priority}</span>
+                        </div>
+                        <p style="margin:0;">${t.title}</p>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+
+        stage.innerHTML = html;
+        
+        // Add a primary CTA to go to Progress Tracker
+        const ctaDiv = document.createElement('div');
+        ctaDiv.style.marginTop = '3rem';
+        ctaDiv.style.textAlign = 'center';
+        ctaDiv.innerHTML = `
+            <a href="progress.html" class="btn-action" style="display:inline-block; padding: 1.2rem 3rem; text-decoration:none;">Launch Progress Tracker →</a>
+            <p style="font-size: 10px; color: var(--text-dim); margin-top: 1rem; letter-spacing: 1px;">PLAN_PERSISTED_TO_SYSTEM_PROFILE</p>
+        `;
+        stage.appendChild(ctaDiv);
+
+        stage.classList.remove('hidden');
+        document.getElementById('mainStage').scrollTop = 0;
+    }
+
+</script>
+<script src="js/command-palette.js"></script>
+<script src="js/os-ui.js"></script>
+</body>
+</html>
