@@ -6,7 +6,7 @@
 const COMMANDS = [
     { id: "dash", name: "Go to Dashboard", desc: "Access the central Operating System hub", url: "landing.html", icon: "🏠" },
     { id: "mods", name: "Modules Index", desc: "View all active system modules and tools", url: "modules.html", icon: "📦" },
-    { id: "lab", name: "Core Engine Laboratory", desc: "Execute M01-M05 structural logic", url: "index.html", icon: "🧪" },
+    { id: "lab", name: "Core Engine Laboratory", desc: "Execute M01-M05 structural logic", url: "index.html?stay=true", icon: "🧪" },
     { id: "arch", name: "Case Study Architect", desc: "Generate professional portfolio assets", url: "case-study-architect.html", icon: "📐" },
     { id: "gap", name: "Skill Gap Analyzer", desc: "Compare your profile against job market", url: "skill-gap-analyzer.html", icon: "🔍" },
     { id: "shield", name: "Contract Shield", desc: "Architect iron-clad legal agreements", url: "contract-generator.html", icon: "🛡️" },

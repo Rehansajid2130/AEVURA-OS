@@ -110,7 +110,7 @@ function renderHeader(user) {
             
             <nav class="header-nav hide-mobile">
                 <a href="landing.html">Dashboard</a>
-                <a href="modules.html">Modules</a>
+<a href="modules.html">Modules</a>
                 <a href="about-me.html">About Me</a>
                 <a href="contact-us.html">Contact Us</a>
             </nav>
