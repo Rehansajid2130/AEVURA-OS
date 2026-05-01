@@ -16,7 +16,8 @@ const ai = new GoogleGenAI({ apiKey: apiKey || 'placeholder' });
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const CACHE_FILE = 'query_cache.json';
+// Use /tmp for Cloud Run compatibility (root is read-only)
+const CACHE_FILE = '/tmp/query_cache.json';
 
 function getCacheKey(prompt: string, systemInstruction: string): string {
     const hash = crypto.createHash('sha256');
@@ -179,7 +180,7 @@ export async function generateStructuredOutput<T>(
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash', // Flash is faster for most standard OS tasks
+                model: 'gemini-1.5-flash', // Stable production model
                 contents: prompt,
                 config: {
                     systemInstruction: systemInstruction,

@@ -1,6 +1,7 @@
-# Use the official lightweight Node.js 20 image.
-# https://hub.docker.com/_/node
 FROM node:20-alpine
+
+# Install build tools for native dependencies (required for bcrypt)
+RUN apk add --no-cache python3 make g++ 
 
 # Create and change to the app directory.
 WORKDIR /usr/src/app
