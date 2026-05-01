@@ -14,8 +14,7 @@ users.json
 .gitignore
 
 # Docker
-Dockerfile
-.dockerignore
+# (Removed from ignore so Cloud Build can see them)
 
 # Documentation/Artifacts
 *.md
