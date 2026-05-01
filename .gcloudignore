@@ -1,0 +1,28 @@
+# gcloudignore
+# This file tells gcloud what to skip when uploading source code for build/deploy.
+
+# Node.js
+node_modules/
+npm-debug.log
+
+# Local State/Secrets
+.env
+firebase-service-account.json
+users.json
+
+# Version Control
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation/Artifacts
+*.md
+WEBSITE_WALKTHROUGH.md
+MODULES_FUNCTIONALITY.md
+PROJECT_GUIDANCE.md
+PROJECT_GUIDE.md
+backend_architecture.md
+ui_guidelines.md

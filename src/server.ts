@@ -441,9 +441,9 @@ app.use((err: any, req: any, res: any, next: any) => {
     });
 });
 
-const PORT = process.env.PORT || 8080;
-const HOST = '0.0.0.0'; // Bind to all interfaces for network access
-app.listen(PORT, HOST as any, async () => {
+const PORT = Number(process.env.PORT) || 8080;
+const HOST = '0.0.0.0'; 
+app.listen(PORT, HOST, () => {
     connectFirebase();
     console.log(`🚀 Aevura OS running at:`);
     console.log(`   - Local:   http://localhost:${PORT}`);
