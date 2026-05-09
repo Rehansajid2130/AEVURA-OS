@@ -582,4 +582,7 @@ window.alert = function(message) {
     if (msgLower.includes('copied') || msgLower.includes('success')) type = 'success';
     window.showToast(message, type);
 };
-// ===================================
+// Load Demo Manager
+const demoScript = document.createElement('script');
+demoScript.src = 'js/demo-manager.js';
+document.head.appendChild(demoScript);

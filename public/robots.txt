@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://aevura-os-1050413354771.europe-west1.run.app/sitemap.xml

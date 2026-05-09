@@ -27,6 +27,18 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+// ─── SECURITY HEADERS ────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    // Basic CSP to allow Google Fonts and own API
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+    next();
+});
+
+
 // Request Logger Middleware
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -42,6 +54,12 @@ const __dirname = path.dirname(__filename);
 
 // Serve static HTML UI
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Favicon.ico Fallback (Fixes 404 in logs)
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/favicon.svg'));
+});
+
 
 // Helper to get authenticated profile from DB
 async function getAuthProfile(req: express.Request): Promise<any | null> {

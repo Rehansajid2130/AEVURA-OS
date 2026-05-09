@@ -10,7 +10,7 @@
         fetch('/api/me')
             .then(r => r.json())
             .then(data => {
-                if (data.profile && !window.location.search.includes('stay')) {
+                if (data.profile && !window.location.search.includes('stay') && !window.location.search.includes('demo')) {
                     window.location.href = 'landing.html';
                 }
             })

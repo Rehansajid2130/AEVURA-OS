@@ -253,21 +253,37 @@
 
         /* Feedback Overlay */
         .feedback-overlay {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.98);
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            z-index: 100;
+            padding: 20px;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
         }
         .feedback-card {
             background: var(--surface);
-            border: 1px solid var(--accent);
+            border: 2px solid var(--accent);
             padding: 60px;
-            max-width: 700px;
+            max-width: 800px;
+            width: 90%;
             text-align: center;
+            position: relative;
+            box-shadow: 0 0 100px rgba(255, 62, 0, 0.1);
+        }
+        .feedback-card::before {
+            content: "MISSION_DEBRIEF";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
         }
         .score { font-size: 80px; font-weight: 700; color: var(--accent); font-family: 'Space Grotesk', sans-serif; margin-bottom: 10px; }
         .score-label { font-size: 11px; color: var(--text-dim); letter-spacing: 4px; margin-bottom: 40px; }
@@ -396,19 +412,19 @@
                         <input type="text" id="userInput" placeholder="Type your response to the client..." onkeypress="if(event.key==='Enter') sendTurn()">
                         <button id="sendBtn" onclick="sendTurn()" disabled>SEND</button>
                     </div>
-
-                    <!-- Feedback Overlay -->
-                    <div class="feedback-overlay" id="feedbackOverlay">
-                        <div class="feedback-card">
-                            <div class="score" id="res-score">?</div>
-                            <div class="score-label">PERFORMANCE SCORE</div>
-                            <div class="critique" id="res-critique"></div>
-                            <ul class="tips-list" id="res-tips"></ul>
-                            <button onclick="window.location.reload()" style="padding: 15px 40px;">TRY AGAIN</button>
-                        </div>
-                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Feedback Overlay (Moved Outside Chat) -->
+    <div class="feedback-overlay" id="feedbackOverlay">
+        <div class="feedback-card">
+            <div class="score" id="res-score">?</div>
+            <div class="score-label">PERFORMANCE SCORE</div>
+            <div class="critique" id="res-critique"></div>
+            <ul class="tips-list" id="res-tips"></ul>
+            <button onclick="window.location.reload()" style="padding: 15px 40px;">RESTART SIMULATION</button>
         </div>
     </div>
 

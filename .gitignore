@@ -5,3 +5,12 @@ node_modules/
 Thumbs.db
 dist/
 .vscode/
+*.json
+!package.json
+!tsconfig.json
+!package-lock.json
+!query_cache.json
+!users.json
+*.mp4
+*.csv
+
