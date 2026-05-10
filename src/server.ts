@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import { generateProfilingQuestions } from './modules/Module1.js';
 import { buildUserProfile } from './modules/Module2.js';
@@ -80,10 +81,20 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'online', 
-        version: '1.0.6',
+        version: '1.0.7',
         timestamp: new Date().toISOString(),
         staticPath: staticPath 
     });
+});
+
+// Debug: List files in public folder
+app.get('/api/debug-files', (req, res) => {
+    try {
+        const files = fs.readdirSync(staticPath);
+        res.json({ staticPath, files });
+    } catch (e: any) {
+        res.json({ error: e.message, staticPath });
+    }
 });
 
 
