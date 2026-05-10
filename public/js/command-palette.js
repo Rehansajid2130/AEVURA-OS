@@ -162,7 +162,7 @@ async function executeCmd(cmd) {
     } else if (cmd.action) {
         if (cmd.action === 'signout') {
             await fetch('/api/signout', { method: 'POST' });
-            window.location.href = 'signin.html';
+            window.location.href = '/signin';
         } else if (cmd.action === 'status') {
             alert("SYSTEM STATUS: NOMINAL\nINTEGRITY: HIGH\nAUTH: ENCRYPTED");
         }

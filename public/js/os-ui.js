@@ -84,7 +84,7 @@ function renderHeader(user) {
                 <a href="#" onclick="togglePalette(); toggleMobileMenu(); return false;" style="color: var(--os-accent);">Search Commands</a>
                 <div style="padding: 20px; border-top: 1px solid var(--os-border); margin-top: auto;">
                     <div style="font-size: 10px; color: var(--os-text-dim); margin-bottom: 10px;">USER: ${userName}</div>
-                    <button onclick="osSignout()" style="width: 100%; padding: 10px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px;">TERMINATE SESSION</button>
+                    <a href="#" onclick="osSignout(); return false;" style="display: block; width: 100%; padding: 12px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px; text-decoration: none; text-align: center; text-transform: uppercase;">TERMINATE SESSION</a>
                 </div>
             `;
             existingHeader.insertAdjacentElement('afterend', mobileNav);
@@ -110,7 +110,7 @@ function renderHeader(user) {
             
             <nav class="header-nav hide-mobile">
                 <a href="landing.html">Dashboard</a>
-<a href="modules.html">Modules</a>
+                <a href="modules.html">Modules</a>
                 <a href="about-me.html">About Me</a>
                 <a href="contact-us.html">Contact Us</a>
             </nav>
@@ -122,7 +122,7 @@ function renderHeader(user) {
                 </div>
                 <div class="user-info">
                     <span class="user-name hide-mobile">${userName}</span>
-                    <button onclick="osSignout()" class="btn-signout">TERMINATE</button>
+                    <a href="#" onclick="osSignout(); return false;" class="btn-signout" style="text-decoration: none;">TERMINATE</a>
                 </div>
                 <button class="header-cmd-btn show-mobile" onclick="togglePalette()" title="System Commands">
                     <span>>_</span>
@@ -132,7 +132,7 @@ function renderHeader(user) {
                 </button>
             </div>
         </div>
-        <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav" id="mobileNavMain">
             <a href="landing.html" onclick="toggleMobileMenu()">Dashboard</a>
             <a href="modules.html" onclick="toggleMobileMenu()">Modules Index</a>
             <a href="about-me.html" onclick="toggleMobileMenu()">About Me</a>
@@ -140,7 +140,7 @@ function renderHeader(user) {
             <a href="#" onclick="togglePalette(); toggleMobileMenu(); return false;" style="color: var(--os-accent);">Search Commands</a>
             <div style="padding: 20px; border-top: 1px solid var(--os-border); margin-top: auto;">
                 <div style="font-size: 10px; color: var(--os-text-dim); margin-bottom: 10px;">USER: ${userName}</div>
-                <button onclick="osSignout()" style="width: 100%; padding: 10px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px;">TERMINATE SESSION</button>
+                <a href="#" onclick="osSignout(); return false;" style="display: block; width: 100%; padding: 12px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px; text-decoration: none; text-align: center; text-transform: uppercase;">TERMINATE SESSION</a>
             </div>
         </div>
     `;
@@ -162,7 +162,7 @@ window.toggleMobileMenu = function() {
 
 async function osSignout() {
     await fetch('/api/signout', { method: 'POST' });
-    window.location.href = 'signin.html';
+    window.location.href = '/signin';
 }
 
 // Global Theme Styles
