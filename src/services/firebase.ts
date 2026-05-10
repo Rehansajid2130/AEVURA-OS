@@ -15,16 +15,21 @@ let db: FirebaseFirestore.Firestore;
 export function connectFirebase() {
     if (getApps().length === 0) {
         try {
+            const envProject = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || null;
+            const hasGac = Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
             if (fs.existsSync(serviceAccountPath)) {
                 console.log('✅ Found firebase-service-account.json. Initializing Firebase...');
                 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-                initializeApp({
+                const app = initializeApp({
                     credential: cert(serviceAccount)
                 });
+                console.log('[FIREBASE_INIT] source=local_json', { envProject, hasGac, appProjectId: app.options?.projectId || null });
             } else {
                 console.warn('⚠️ No firebase-service-account.json found. If this is a live deployment, make sure GOOGLE_APPLICATION_CREDENTIALS is set.');
                 // Initialize using default application credentials
-                initializeApp();
+                const app = initializeApp();
+                console.log('[FIREBASE_INIT] source=adc', { envProject, hasGac, appProjectId: app.options?.projectId || null });
             }
             db = getFirestore();
             db.settings({ ignoreUndefinedProperties: true }); 

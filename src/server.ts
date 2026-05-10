@@ -118,6 +118,18 @@ app.get('/api/debug-files', (req, res) => {
     }
 });
 
+// Debug: confirm runtime project/credentials visibility (no secrets)
+app.get('/api/debug-gcp', (req, res) => {
+    res.json({
+        project: process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || null,
+        hasGoogleApplicationCredentials: Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+        nodeEnv: process.env.NODE_ENV || null,
+        revision: process.env.K_REVISION || null,
+        service: process.env.K_SERVICE || null,
+        region: process.env.K_REGION || null
+    });
+});
+
 
 // Helper to get authenticated profile from DB
 async function getAuthProfile(req: express.Request): Promise<any | null> {
@@ -524,6 +536,16 @@ app.use((req, res) => {
 
 app.use((err: any, req: any, res: any, next: any) => {
     console.error('[SERVER ERROR]', err);
+    const msg = String(err?.message || '');
+    const details = String(err?.details || '');
+    if ((msg.includes('PERMISSION_DENIED') || details.includes('PERMISSION_DENIED')) && (msg.toLowerCase().includes('firestore') || details.toLowerCase().includes('firestore'))) {
+        res.status(503).json({
+            error: 'Firestore Permission Error',
+            message: msg || details,
+            project: process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || null
+        });
+        return;
+    }
     res.status(500).json({ 
         error: 'Internal Server Error', 
         message: err.message || 'An unexpected error occurred.' 
