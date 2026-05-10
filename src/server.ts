@@ -37,6 +37,8 @@ app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    // Prove which responses are served by this Express app (useful when debugging GFE/URL-map 404s)
+    res.setHeader('X-Aevura-App', 'express');
     // Basic CSP to allow Google Fonts and own API
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
     next();
@@ -60,11 +62,30 @@ const __dirname = path.dirname(__filename);
 // Diagnostic: Resolve static path using process.cwd() for better Docker compatibility
 const staticPath = path.join(process.cwd(), 'public');
 console.log(`[OS_INIT] Static directory resolved to: ${staticPath}`);
+// #region agent log
+fetch('http://127.0.0.1:7416/ingest/a788dbe8-6491-4535-b23e-f6f825c4d7fb',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'bf159e'},body:JSON.stringify({sessionId:'bf159e',runId:'pre-fix',hypothesisId:'A',location:'src/server.ts:staticPath',message:'Static path + cwd at startup',data:{cwd:process.cwd(),staticPath,publicExists:fs.existsSync(staticPath),signinExists:fs.existsSync(path.join(staticPath,'signin.html'))},timestamp:Date.now()})}).catch(()=>{});
+// #endregion
 
 // Explicitly serve index.html for the root to bypass any potential static serving ambiguity
 app.get('/', (req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));
 });
+
+// If Cloud Run (or a URL map) is mis-handling *.html paths, this redirect will fix it
+// as long as the request actually reaches the container.
+app.get('/signin.html', (req, res) => {
+    res.redirect(308, '/signin');
+});
+
+// #region agent log
+app.use((req, res, next) => {
+    if (req.method === 'GET' && (req.path === '/signin.html' || req.path === '/signin' || req.path.endsWith('.html'))) {
+        const resolved = path.join(staticPath, req.path.replace(/^\//, ''));
+        fetch('http://127.0.0.1:7416/ingest/a788dbe8-6491-4535-b23e-f6f825c4d7fb',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'bf159e'},body:JSON.stringify({sessionId:'bf159e',runId:'pre-fix',hypothesisId:'B',location:'src/server.ts:reqProbe',message:'Incoming page request + resolved static file',data:{method:req.method,url:req.url,path:req.path,staticPath,cwd:process.cwd(),resolved,exists:fs.existsSync(resolved)},timestamp:Date.now()})}).catch(()=>{});
+    }
+    next();
+});
+// #endregion
 
 // Serve static HTML UI with extension support (allows /signin instead of /signin.html)
 app.use(express.static(staticPath, {
@@ -81,7 +102,7 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'online', 
-        version: '1.0.7',
+        version: '1.0.8',
         timestamp: new Date().toISOString(),
         staticPath: staticPath 
     });
@@ -487,6 +508,13 @@ app.use((req, res) => {
         res.sendFile(path.join(staticPath, 'index.html'));
         return;
     }
+
+    // #region agent log
+    if (req.method === 'GET' && (req.path === '/signin.html' || req.path === '/signin' || req.path.endsWith('.html'))) {
+        const resolved = path.join(staticPath, req.path.replace(/^\//, ''));
+        fetch('http://127.0.0.1:7416/ingest/a788dbe8-6491-4535-b23e-f6f825c4d7fb',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'bf159e'},body:JSON.stringify({sessionId:'bf159e',runId:'pre-fix',hypothesisId:'D',location:'src/server.ts:404',message:'404 handler reached for page request',data:{method:req.method,url:req.url,path:req.path,staticPath,cwd:process.cwd(),resolved,exists:fs.existsSync(resolved),isApi,isAsset},timestamp:Date.now()})}).catch(()=>{});
+    }
+    // #endregion
 
     res.status(404).json({ 
         error: 'Route Not Found', 
