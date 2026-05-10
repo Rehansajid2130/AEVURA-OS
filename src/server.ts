@@ -26,6 +26,9 @@ connectFirebase();
 
 const app = express();
 
+// Trust proxy for Cloud Run/Firebase Hosting to handle HTTPS cookies correctly
+app.set('trust proxy', true);
+
 // Security Headers & Logging
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -70,6 +73,17 @@ app.use(express.static(staticPath, {
 // Favicon.ico Fallback (Fixes 404 in logs)
 app.get('/favicon.ico', (req, res) => {
     res.sendFile(path.join(staticPath, 'favicon.svg'));
+});
+
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'online', 
+        version: '1.0.6',
+        timestamp: new Date().toISOString(),
+        staticPath: staticPath 
+    });
 });
 
 
@@ -453,8 +467,11 @@ app.use((req, res) => {
     console.error(`[404] Route not found: ${req.method} ${req.url}`);
     
     const isApi = req.url.startsWith('/api/');
-    
-    if (!isApi) {
+    const isAsset = req.url.includes('.');
+
+    // Only fallback to index.html for GET requests that look like page requests
+    // Assets (with dots) and API calls should return a standard 404
+    if (req.method === 'GET' && !isApi && !isAsset) {
         console.log(`[404_FALLBACK] Serving index.html for: ${req.url}`);
         res.sendFile(path.join(staticPath, 'index.html'));
         return;
