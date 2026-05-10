@@ -52,12 +52,18 @@ console.log(">> SERVER.TS LOADED: v1.0.5 with Contract Shield <<");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static HTML UI
-app.use(express.static(path.join(__dirname, '../public')));
+// Diagnostic: Log static directory path
+const staticPath = path.join(__dirname, '../public');
+console.log(`[OS_INIT] Serving static files from: ${staticPath}`);
+
+// Serve static HTML UI with extension support (allows /signin instead of /signin.html)
+app.use(express.static(staticPath, {
+    extensions: ['html', 'htm']
+}));
 
 // Favicon.ico Fallback (Fixes 404 in logs)
 app.get('/favicon.ico', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/favicon.svg'));
+    res.sendFile(path.join(staticPath, 'favicon.svg'));
 });
 
 
@@ -439,6 +445,14 @@ app.post('/api/progress/toggle', async (req, res) => {
 // ─── ERROR HANDLING ─────────────────────────────────────────────────────────
 app.use((req, res) => {
     console.error(`[404] Route not found: ${req.method} ${req.url}`);
+    
+    // If it's a page request (no extension or .html), fallback to index.html for SPA-like behavior or home redirect
+    if (!req.url.includes('.') || req.url.endsWith('.html')) {
+        console.log(`[404_FALLBACK] Redirecting to index.html for: ${req.url}`);
+        res.sendFile(path.join(staticPath, 'index.html'));
+        return;
+    }
+
     res.status(404).json({ 
         error: 'Route Not Found', 
         message: `The endpoint ${req.method} ${req.url} does not exist on this server.`,
@@ -446,7 +460,8 @@ app.use((req, res) => {
             '/api/signup', '/api/signin', '/api/me',
             '/api/sim/custom-save', '/api/sim/custom-delete', '/api/sim/start', '/api/sim/turn',
             '/api/freelance/proposal', '/api/freelance/profile-optimize',
-            '/api/skill-gap/analyze', '/api/portfolio/generate', '/api/contract/generate'
+            '/api/skill-gap/analyze', '/api/portfolio/generate', '/api/contract/generate',
+            '/api/decision-engine/decide', '/api/progress', '/api/progress/insight', '/api/progress/toggle'
         ]
     });
 });
