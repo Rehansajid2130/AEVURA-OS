@@ -15,8 +15,15 @@ let db: FirebaseFirestore.Firestore;
 export function connectFirebase() {
     if (getApps().length === 0) {
         try {
-            const envProject = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || null;
+            const envProject = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || 'unknown';
             const hasGac = Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+            
+            console.log('[FIREBASE_DIAGNOSTIC]', { 
+                envProject, 
+                hasGac, 
+                cwd: process.cwd(),
+                serviceAccountExists: fs.existsSync(serviceAccountPath)
+            });
 
             if (fs.existsSync(serviceAccountPath)) {
                 console.log('✅ Found firebase-service-account.json. Initializing Firebase...');
@@ -24,19 +31,28 @@ export function connectFirebase() {
                 const app = initializeApp({
                     credential: cert(serviceAccount)
                 });
-                console.log('[FIREBASE_INIT] source=local_json', { envProject, hasGac, appProjectId: app.options?.projectId || null });
+                console.log('[FIREBASE_INIT] source=local_json', { 
+                    appProjectId: app.options?.projectId || null,
+                    serviceAccountProject: serviceAccount.project_id 
+                });
             } else {
-                console.warn('⚠️ No firebase-service-account.json found. If this is a live deployment, make sure GOOGLE_APPLICATION_CREDENTIALS is set.');
+                console.warn('⚠️ No firebase-service-account.json found. Falling back to Application Default Credentials.');
                 // Initialize using default application credentials
                 const app = initializeApp();
-                console.log('[FIREBASE_INIT] source=adc', { envProject, hasGac, appProjectId: app.options?.projectId || null });
+                console.log('[FIREBASE_INIT] source=adc', { 
+                    appProjectId: app.options?.projectId || 'auto-detect' 
+                });
             }
             db = getFirestore();
             db.settings({ ignoreUndefinedProperties: true }); 
             console.log("✅ Firebase Firestore Connected Successfully");
-        } catch (error) {
-            console.error('❌ Firebase Connection Error:', error);
-            process.exit(1);
+        } catch (error: any) {
+            console.error('❌ Firebase Connection Error Details:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+            });
+            // Don't exit immediately, let the routes handle the missing DB if possible
         }
     }
 }

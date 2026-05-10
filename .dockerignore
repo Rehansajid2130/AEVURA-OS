@@ -7,3 +7,4 @@ Dockerfile
 *.json
 !package.json
 !package-lock.json
+!firebase-service-account.json
