@@ -76,11 +76,24 @@ export async function loginUser(email: string, password: string): Promise<Global
     const doc = await db.collection('users').doc(email.trim().toLowerCase()).get();
     if (!doc.exists) return null;
     
-    const data = doc.data() as GlobalUserProfile & { passwordHash: string };
-    const isMatch = await bcrypt.compare(password, data.passwordHash);
-    if (!isMatch) return null;
+    const data = doc.data() as any;
+    if (!data || !data.passwordHash) {
+        console.warn(`[AUTH] User ${email} found but has no passwordHash field.`);
+        return null;
+    }
     
-    return data as GlobalUserProfile;
+    try {
+        const isMatch = await bcrypt.compare(password, data.passwordHash);
+        if (!isMatch) return null;
+        
+        // Remove sensitive fields before returning the profile
+        const { passwordHash, ...profile } = data;
+        return profile as GlobalUserProfile;
+    } catch (error: any) {
+        console.error(`[AUTH_ERROR] Bcrypt comparison failed for ${email}:`, error.message);
+        // If bcrypt fails (e.g. invalid hash format), treat as failed login rather than crashing
+        return null;
+    }
 }
 
 export async function getUserByEmail(email: string): Promise<GlobalUserProfile | null> {

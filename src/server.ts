@@ -141,38 +141,51 @@ async function getAuthProfile(req: express.Request): Promise<any | null> {
 // ─── AUTH ROUTES ────────────────────────────────────────────────────────────
 
 app.post('/api/signup', async (req, res) => {
-    const { answers, password } = req.body;
-    if (!answers || !password || !answers.email) {
-        res.status(200).json({ error: 'Missing required fields.' });
-        return;
+    try {
+        const { answers, password } = req.body;
+        if (!answers || !password || !answers.email) {
+            res.status(200).json({ error: 'Missing required fields.' });
+            return;
+        }
+        const profile = processSignupAnswers(answers);
+        const registered = await registerUser(profile, password);
+        if (!registered) {
+            res.status(200).json({ error: 'Account already exists.' });
+            return;
+        }
+        
+        // Set cookie for persistence (expires in 7 days)
+        res.cookie('sessionEmail', profile.email, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
+        
+        // Remove passwordHash if it was accidentally included in registerUser return (it shouldn't be, but safe to exclude)
+        const { ...safeProfile } = profile;
+        res.json({ success: true, profile: safeProfile });
+    } catch (e: any) {
+        console.error('[SIGNUP ERROR]', e);
+        res.status(500).json({ error: 'Internal Server Error', message: e.message });
     }
-    const profile = processSignupAnswers(answers);
-    const registered = await registerUser(profile, password);
-    if (!registered) {
-        res.status(200).json({ error: 'Account already exists.' });
-        return;
-    }
-    
-    // Set cookie for persistence (expires in 7 days)
-    res.cookie('sessionEmail', profile.email, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
-    res.json({ success: true, profile });
 });
 
 app.post('/api/signin', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        res.status(200).json({ error: 'Email and password required.' });
-        return;
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            res.status(200).json({ error: 'Email and password required.' });
+            return;
+        }
+        const profile = await loginUser(email, password);
+        if (!profile) {
+            res.status(200).json({ error: 'Invalid credentials.' });
+            return;
+        }
+        
+        // Set cookie
+        res.cookie('sessionEmail', profile.email, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
+        res.json({ success: true, profile });
+    } catch (e: any) {
+        console.error('[SIGNIN ERROR]', e);
+        res.status(500).json({ error: 'Internal Server Error', message: e.message });
     }
-    const profile = await loginUser(email, password);
-    if (!profile) {
-        res.status(200).json({ error: 'Invalid credentials.' });
-        return;
-    }
-    
-    // Set cookie
-    res.cookie('sessionEmail', profile.email, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
-    res.json({ success: true, profile });
 });
 
 app.get('/api/me', async (req, res) => {
