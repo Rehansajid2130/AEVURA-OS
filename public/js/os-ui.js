@@ -16,7 +16,7 @@ async function initOS() {
         const response = await fetch('/api/me');
         const data = await response.json();
         if (data.error || !data.profile) {
-            window.location.href = 'signin.html';
+            window.location.href = 'signin';
             return;
         }
         window.currentUser = data.profile;
@@ -36,8 +36,8 @@ async function initOS() {
         }
 
         // Update detected if this is a module page
-        const modulePages = ['index.html', 'freelancer-assistant.html', 'simulation.html', 'case-study-architect.html', 'skill-gap-analyzer.html', 'contract-generator.html', 'decision-engine.html', 'modules.html', 'progress.html'];
-        const currentPage = window.location.pathname.split('/').pop() || 'landing.html';
+        const modulePages = ['index', 'freelancer-assistant', 'simulation', 'case-study-architect', 'skill-gap-analyzer', 'contract-generator', 'decision-engine', 'modules', 'progress'];
+        const currentPage = window.location.pathname.split('/').pop() || 'landing';
         if (modulePages.includes(currentPage)) {
             document.body.classList.add('is-module');
         }
@@ -45,7 +45,7 @@ async function initOS() {
         renderHeader(data.profile);
     } catch (err) {
         console.error("Auth Failure", err);
-        window.location.href = 'signin.html';
+        window.location.href = 'signin';
     }
 
     // 2. Initialize Command Palette
@@ -77,14 +77,14 @@ function renderHeader(user) {
             mobileNav.className = 'mobile-nav';
             mobileNav.id = 'mobileNav';
             mobileNav.innerHTML = `
-                <a href="landing.html" onclick="toggleMobileMenu()">Dashboard</a>
-                <a href="modules.html" onclick="toggleMobileMenu()">Modules Index</a>
-                <a href="about-me.html" onclick="toggleMobileMenu()">About Me</a>
-                <a href="contact-us.html" onclick="toggleMobileMenu()">Contact Us</a>
+                <a href="landing" onclick="toggleMobileMenu()">Dashboard</a>
+                <a href="modules" onclick="toggleMobileMenu()">Modules Index</a>
+                <a href="about-me" onclick="toggleMobileMenu()">About Me</a>
+                <a href="contact-us" onclick="toggleMobileMenu()">Contact Us</a>
                 <a href="#" onclick="togglePalette(); toggleMobileMenu(); return false;" style="color: var(--os-accent);">Search Commands</a>
                 <div style="padding: 20px; border-top: 1px solid var(--os-border); margin-top: auto;">
                     <div style="font-size: 10px; color: var(--os-text-dim); margin-bottom: 10px;">USER: ${userName}</div>
-                    <a href="#" onclick="osSignout(); return false;" style="display: block; width: 100%; padding: 12px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px; text-decoration: none; text-align: center; text-transform: uppercase;">TERMINATE SESSION</a>
+                    <button onclick="osSignout()" style="width: 100%; padding: 10px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px;">TERMINATE SESSION</button>
                 </div>
             `;
             existingHeader.insertAdjacentElement('afterend', mobileNav);
@@ -100,7 +100,7 @@ function renderHeader(user) {
     header.innerHTML = `
         <div class="header-inner">
             <div class="header-left">
-                <a href="landing.html" class="os-logo">
+                <a href="landing" class="os-logo">
                     <span class="logo-mark">>_</span>
                     <span class="logo-text">AEVURA <span class="logo-os">OS</span></span>
                 </a>
@@ -109,10 +109,10 @@ function renderHeader(user) {
             </div>
             
             <nav class="header-nav hide-mobile">
-                <a href="landing.html">Dashboard</a>
-                <a href="modules.html">Modules</a>
-                <a href="about-me.html">About Me</a>
-                <a href="contact-us.html">Contact Us</a>
+                <a href="landing">Dashboard</a>
+                <a href="modules">Modules</a>
+                <a href="about-me">About Me</a>
+                <a href="contact-us">Contact Us</a>
             </nav>
 
             <div class="header-right">
@@ -122,7 +122,7 @@ function renderHeader(user) {
                 </div>
                 <div class="user-info">
                     <span class="user-name hide-mobile">${userName}</span>
-                    <a href="#" onclick="osSignout(); return false;" class="btn-signout" style="text-decoration: none;">TERMINATE</a>
+                    <button onclick="osSignout()" class="btn-signout">TERMINATE</button>
                 </div>
                 <button class="header-cmd-btn show-mobile" onclick="togglePalette()" title="System Commands">
                     <span>>_</span>
@@ -132,21 +132,21 @@ function renderHeader(user) {
                 </button>
             </div>
         </div>
-        <div class="mobile-nav" id="mobileNavMain">
-            <a href="landing.html" onclick="toggleMobileMenu()">Dashboard</a>
-            <a href="modules.html" onclick="toggleMobileMenu()">Modules Index</a>
-            <a href="about-me.html" onclick="toggleMobileMenu()">About Me</a>
-            <a href="contact-us.html" onclick="toggleMobileMenu()">Contact Us</a>
+        <div class="mobile-nav" id="mobileNav">
+            <a href="landing" onclick="toggleMobileMenu()">Dashboard</a>
+            <a href="modules" onclick="toggleMobileMenu()">Modules Index</a>
+            <a href="about-me" onclick="toggleMobileMenu()">About Me</a>
+            <a href="contact-us" onclick="toggleMobileMenu()">Contact Us</a>
             <a href="#" onclick="togglePalette(); toggleMobileMenu(); return false;" style="color: var(--os-accent);">Search Commands</a>
             <div style="padding: 20px; border-top: 1px solid var(--os-border); margin-top: auto;">
                 <div style="font-size: 10px; color: var(--os-text-dim); margin-bottom: 10px;">USER: ${userName}</div>
-                <a href="#" onclick="osSignout(); return false;" style="display: block; width: 100%; padding: 12px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px; text-decoration: none; text-align: center; text-transform: uppercase;">TERMINATE SESSION</a>
+                <button onclick="osSignout()" style="width: 100%; padding: 10px; background: var(--os-accent); color: #000; border: none; font-weight: 700; font-family: inherit; font-size: 11px;">TERMINATE SESSION</button>
             </div>
         </div>
     `;
     document.body.prepend(header);
 
-    const currentPath = window.location.pathname.split('/').pop() || 'landing.html';
+    const currentPath = window.location.pathname.split('/').pop() || 'landing';
     document.querySelectorAll('.header-nav a, .mobile-nav a').forEach(a => {
         if (a.getAttribute('href') === currentPath) a.classList.add('active');
     });
@@ -162,7 +162,7 @@ window.toggleMobileMenu = function() {
 
 async function osSignout() {
     await fetch('/api/signout', { method: 'POST' });
-    window.location.href = '/signin';
+    window.location.href = 'signin';
 }
 
 // Global Theme Styles

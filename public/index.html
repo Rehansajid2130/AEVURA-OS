@@ -11,7 +11,7 @@
             .then(r => r.json())
             .then(data => {
                 if (data.profile && !window.location.search.includes('stay') && !window.location.search.includes('demo')) {
-                    window.location.href = 'landing.html';
+                    window.location.href = 'landing';
                 }
             })
             .catch(() => {});
@@ -503,7 +503,7 @@
         ctaDiv.style.marginTop = '3rem';
         ctaDiv.style.textAlign = 'center';
         ctaDiv.innerHTML = `
-            <a href="progress.html" class="btn-action" style="display:inline-block; padding: 1.2rem 3rem; text-decoration:none;">Launch Progress Tracker →</a>
+            <a href="progress" class="btn-action" style="display:inline-block; padding: 1.2rem 3rem; text-decoration:none;">Launch Progress Tracker →</a>
             <p style="font-size: 10px; color: var(--text-dim); margin-top: 1rem; letter-spacing: 1px;">PLAN_PERSISTED_TO_SYSTEM_PROFILE</p>
         `;
         stage.appendChild(ctaDiv);

@@ -122,7 +122,7 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: -8px; margin-bottom: 24px;">
             <div class="link-row" style="margin-top: 0; font-size: 11px;">
-                <a href="forgot-password.html">Forgot Password?</a>
+                <a href="forgot-password">Forgot Password?</a>
             </div>
         </div>
 
@@ -132,7 +132,7 @@
         <div class="success" id="successBox"></div>
 
         <div class="link-row">
-            Don't have an account? <a href="signup.html">Create one here</a>
+            Don't have an account? <a href="signup">Create one here</a>
         </div>
 
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; text-align: center; font-size: 10px; color: #444; letter-spacing: 1px;">
@@ -144,7 +144,7 @@
         // If already logged in, redirect straight to landing
         fetch('/api/me').then(r => r.json()).then(data => {
             if (data.profile) {
-                window.location.href = '/landing.html';
+                window.location.href = '/landing';
             }
         }).catch(() => {});
 
@@ -185,7 +185,7 @@
 
                 successBox.textContent = `Welcome back, ${data.profile.name}! Redirecting...`;
                 successBox.style.display = 'block';
-                setTimeout(() => { window.location.href = '/landing.html'; }, 1200);
+                setTimeout(() => { window.location.href = '/landing'; }, 1200);
 
             } catch (e) {
                 errorBox.textContent = 'Could not connect to server. Is it running?';

@@ -4,16 +4,16 @@
 */
 
 const COMMANDS = [
-    { id: "dash", name: "Go to Dashboard", desc: "Access the central Operating System hub", url: "landing.html", icon: "🏠" },
-    { id: "mods", name: "Modules Index", desc: "View all active system modules and tools", url: "modules.html", icon: "📦" },
-    { id: "lab", name: "Core Engine Laboratory", desc: "Execute M01-M05 structural logic", url: "index.html?stay=true", icon: "🧪" },
-    { id: "arch", name: "Case Study Architect", desc: "Generate professional portfolio assets", url: "case-study-architect.html", icon: "📐" },
-    { id: "gap", name: "Skill Gap Analyzer", desc: "Compare your profile against job market", url: "skill-gap-analyzer.html", icon: "🔍" },
-    { id: "shield", name: "Contract Shield", desc: "Architect iron-clad legal agreements", url: "contract-generator.html", icon: "🛡️" },
-    { id: "decide", name: "Decision Engine", desc: "Compare career paths and skill choices", url: "decision-engine.html", icon: "🧠" },
-    { id: "progress", name: "Progress Tracker", desc: "Track micro-tasks and roadmap metrics", url: "progress.html", icon: "📈" },
-    { id: "gig", name: "Search Gigs", desc: "Usage: gig [skill]", url: "freelancer-assistant.html", icon: "💼" },
-    { id: "sim", name: "Start Simulation", desc: "Usage: sim [scenario]", url: "simulation.html", icon: "🤖" },
+    { id: "dash", name: "Go to Dashboard", desc: "Access the central Operating System hub", url: "landing", icon: "🏠" },
+    { id: "mods", name: "Modules Index", desc: "View all active system modules and tools", url: "modules", icon: "📦" },
+    { id: "lab", name: "Core Engine Laboratory", desc: "Execute M01-M05 structural logic", url: "index?stay=true", icon: "🧪" },
+    { id: "arch", name: "Case Study Architect", desc: "Generate professional portfolio assets", url: "case-study-architect", icon: "📐" },
+    { id: "gap", name: "Skill Gap Analyzer", desc: "Compare your profile against job market", url: "skill-gap-analyzer", icon: "🔍" },
+    { id: "shield", name: "Contract Shield", desc: "Architect iron-clad legal agreements", url: "contract-generator", icon: "🛡️" },
+    { id: "decide", name: "Decision Engine", desc: "Compare career paths and skill choices", url: "decision-engine", icon: "🧠" },
+    { id: "progress", name: "Progress Tracker", desc: "Track micro-tasks and roadmap metrics", url: "progress", icon: "📈" },
+    { id: "gig", name: "Search Gigs", desc: "Usage: gig [skill]", url: "freelancer-assistant", icon: "💼" },
+    { id: "sim", name: "Start Simulation", desc: "Usage: sim [scenario]", url: "simulation", icon: "🤖" },
     { id: "signout", name: "System: Sign Out", desc: "Terminate current session safely", action: "signout", icon: "⏹️" },
     { id: "status", name: "System: Status Check", desc: "Inspect current profile integrity", action: "status", icon: "⚡" }
 ];
@@ -162,7 +162,7 @@ async function executeCmd(cmd) {
     } else if (cmd.action) {
         if (cmd.action === 'signout') {
             await fetch('/api/signout', { method: 'POST' });
-            window.location.href = '/signin';
+            window.location.href = 'signin';
         } else if (cmd.action === 'status') {
             alert("SYSTEM STATUS: NOMINAL\nINTEGRITY: HIGH\nAUTH: ENCRYPTED");
         }

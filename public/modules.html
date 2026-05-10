@@ -234,7 +234,7 @@
 <header class="os-header">
     <div class="header-inner">
         <div class="header-left">
-            <a href="landing.html" class="os-logo">
+            <a href="landing" class="os-logo">
                 <span class="logo-mark">>_</span>
                 <span class="logo-text">AEVURA <span class="logo-os">OS</span></span>
             </a>
@@ -243,10 +243,10 @@
         </div>
         
         <nav class="header-nav hide-mobile">
-            <a href="landing.html">Dashboard</a>
-            <a href="modules.html" class="active">Modules</a>
-            <a href="about-me.html">About Me</a>
-            <a href="contact-us.html">Contact Us</a>
+            <a href="landing">Dashboard</a>
+            <a href="modules" class="active">Modules</a>
+            <a href="about-me">About Me</a>
+            <a href="contact-us">Contact Us</a>
         </nav>
 
         <div class="header-right">
@@ -256,7 +256,7 @@
             </div>
             <div class="user-info">
                 <span class="user-name hide-mobile">AUTHENTICATING...</span>
-                <a href="#" onclick="osSignout(); return false;" class="btn-signout" style="text-decoration: none;">TERMINATE</a>
+                <button onclick="osSignout()" class="btn-signout">TERMINATE</button>
             </div>
             <button class="header-cmd-btn show-mobile" onclick="togglePalette()" title="System Commands">
                 <span>>_</span>
@@ -294,7 +294,7 @@
                 <div class="module-desc">The primary control hub for profiling, strategic goal analysis, and multi-level roadmap generation.</div>
             </div>
             <div class="module-footer">
-                <a href="index.html?stay=true" class="module-launch-btn">Launch Module</a>
+                <a href="index?stay=true" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -309,7 +309,7 @@
                 <div class="module-desc">AI-powered gig suggestion engine, proposal crafter, and marketplace profile optimizer.</div>
             </div>
             <div class="module-footer">
-                <a href="freelancer-assistant.html" class="module-launch-btn">Launch Module</a>
+                <a href="freelancer-assistant" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -324,7 +324,7 @@
                 <div class="module-desc">Dynamic adversarial simulation mode for practicing high-stakes interviews and client negotiations.</div>
             </div>
             <div class="module-footer">
-                <a href="simulation.html" class="module-launch-btn">Launch Module</a>
+                <a href="simulation" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -339,7 +339,7 @@
                 <div class="module-desc">Convert raw technical data and project results into professional, high-conversion sales assets.</div>
             </div>
             <div class="module-footer">
-                <a href="case-study-architect.html" class="module-launch-btn">Launch Module</a>
+                <a href="case-study-architect" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -354,7 +354,7 @@
                 <div class="module-desc">Adversarial profile auditing against real-time job market requirements to eliminate skill weaknesses.</div>
             </div>
             <div class="module-footer">
-                <a href="skill-gap-analyzer.html" class="module-launch-btn">Launch Module</a>
+                <a href="skill-gap-analyzer" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -369,7 +369,7 @@
                 <div class="module-desc">Generate iron-clad freelance agreements and legal documents to protect your IP and payments.</div>
             </div>
             <div class="module-footer">
-                <a href="contract-generator.html" class="module-launch-btn">Launch Module</a>
+                <a href="contract-generator" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -384,7 +384,7 @@
                 <div class="module-desc">Comparative analysis of career paths, skill choices, and strategic pivots based on profile data.</div>
             </div>
             <div class="module-footer">
-                <a href="decision-engine.html" class="module-launch-btn">Launch Module</a>
+                <a href="decision-engine" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
 
@@ -399,7 +399,7 @@
                 <div class="module-desc">Monitor roadmap completion, manage micro-tasks, and receive strategic AI-driven performance insights.</div>
             </div>
             <div class="module-footer">
-                <a href="progress.html" class="module-launch-btn">Launch Module</a>
+                <a href="progress" class="module-launch-btn">Launch Module</a>
             </div>
         </div>
     </div>
@@ -449,7 +449,7 @@
                 <div style="grid-column: span 2; padding: 40px; border: 1px dashed var(--border); background: rgba(255,62,0,0.02); text-align: center;">
                     <div style="color: var(--accent); font-size: 14px; font-weight: 700; margin-bottom: 10px;">MISSION_NOT_INITIALIZED</div>
                     <p style="color: var(--text-dim); font-size: 11px; margin-bottom: 20px;">The Core Engine Laboratory has not yet calculated a strategic roadmap for your current profile.</p>
-                    <a href="index.html?stay=true" class="module-launch-btn" style="display:inline-block; width: auto; padding: 10px 30px;">Initialize Core Lab →</a>
+                    <a href="index?stay=true" class="module-launch-btn" style="display:inline-block; width: auto; padding: 10px 30px;">Initialize Core Lab →</a>
                 </div>
             `;
             return;
@@ -481,7 +481,7 @@
                         </div>
                     `).join('') : '<div style="font-size:10px; color:var(--text-dim); padding:10px;">ALL_OBJECTIVES_RESOLVED</div>'}
                 </div>
-                <a href="progress.html" class="module-launch-btn" style="margin-top: 2rem; border-style: solid; max-width: 240px; margin-left: auto; margin-right: auto;">View Tactical Map →</a>
+                <a href="progress" class="module-launch-btn" style="margin-top: 2rem; border-style: solid; max-width: 240px; margin-left: auto; margin-right: auto;">View Tactical Map →</a>
             </div>
         `;
 
