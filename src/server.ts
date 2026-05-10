@@ -21,14 +21,14 @@ import { decideOption } from './modules/Module7.js';
 import { calculateInstantMetrics, generateStrategicInsight } from './modules/Module8.js';
 import { connectFirebase } from './services/firebase.js';
 
+// Connect to Firebase Firestore
+connectFirebase();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(cookieParser());
 
-// ─── SECURITY HEADERS ────────────────────────────────────────────────────────
+// Security Headers & Logging
 app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -38,12 +38,13 @@ app.use((req, res, next) => {
     next();
 });
 
-
-// Request Logger Middleware
-app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    next();
-});
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -52,9 +53,14 @@ console.log(">> SERVER.TS LOADED: v1.0.5 with Contract Shield <<");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Diagnostic: Log static directory path
-const staticPath = path.join(__dirname, '../public');
-console.log(`[OS_INIT] Serving static files from: ${staticPath}`);
+// Diagnostic: Resolve static path using process.cwd() for better Docker compatibility
+const staticPath = path.join(process.cwd(), 'public');
+console.log(`[OS_INIT] Static directory resolved to: ${staticPath}`);
+
+// Explicitly serve index.html for the root to bypass any potential static serving ambiguity
+app.get('/', (req, res) => {
+    res.sendFile(path.join(staticPath, 'index.html'));
+});
 
 // Serve static HTML UI with extension support (allows /signin instead of /signin.html)
 app.use(express.static(staticPath, {
@@ -446,23 +452,17 @@ app.post('/api/progress/toggle', async (req, res) => {
 app.use((req, res) => {
     console.error(`[404] Route not found: ${req.method} ${req.url}`);
     
-    // If it's a page request (no extension or .html), fallback to index.html for SPA-like behavior or home redirect
-    if (!req.url.includes('.') || req.url.endsWith('.html')) {
-        console.log(`[404_FALLBACK] Redirecting to index.html for: ${req.url}`);
+    const isApi = req.url.startsWith('/api/');
+    
+    if (!isApi) {
+        console.log(`[404_FALLBACK] Serving index.html for: ${req.url}`);
         res.sendFile(path.join(staticPath, 'index.html'));
         return;
     }
 
     res.status(404).json({ 
         error: 'Route Not Found', 
-        message: `The endpoint ${req.method} ${req.url} does not exist on this server.`,
-        available_endpoints: [
-            '/api/signup', '/api/signin', '/api/me',
-            '/api/sim/custom-save', '/api/sim/custom-delete', '/api/sim/start', '/api/sim/turn',
-            '/api/freelance/proposal', '/api/freelance/profile-optimize',
-            '/api/skill-gap/analyze', '/api/portfolio/generate', '/api/contract/generate',
-            '/api/decision-engine/decide', '/api/progress', '/api/progress/insight', '/api/progress/toggle'
-        ]
+        message: `The endpoint ${req.method} ${req.url} does not exist on this server.`
     });
 });
 
@@ -477,8 +477,8 @@ app.use((err: any, req: any, res: any, next: any) => {
 const PORT = Number(process.env.PORT) || 8080;
 const HOST = '0.0.0.0'; 
 app.listen(PORT, HOST, () => {
-    connectFirebase();
     console.log(`🚀 Aevura OS running at:`);
     console.log(`   - Local:   http://localhost:${PORT}`);
     console.log(`   - Network: http://[YOUR_IP]:${PORT}`);
+    console.log(`   - Region:  Europe-West1`);
 });
